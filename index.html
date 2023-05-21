@@ -1,0 +1,59 @@
+
+<!DOCTYPE html>
+<html lang="en-US">
+
+<head>
+
+    <title>SVG Formula</title>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Security-Policy" >
+
+    <script src="d3.js"></script>
+
+    <!-- -->
+    <title>Formula Creator</title>
+</head>
+
+<html>
+<h1>Convert an equation to SVG</h1>
+
+<label for="equation">Enter Equation Below:</label>
+<input type="button" value="Make Equation" onClick="convertEqntoSVG()"><br/><br/>
+<textarea id="equation" rows="6" cols="60" placeholder="Enter Equation in LaTex or ASCIIMath"></textarea>
+
+<br/><br/>
+<div id='equation-space'>Preview will display here.</div>
+
+<p>File path to save the SVG output:</p>
+<input type="text" id="svg-file-path" size="80">
+<br/><br/>
+Syntax References:
+<ul>
+    <li><a href="http://asciimath.org/" target="_blank">Reference for ASCIIMath Syntax</a></li>
+    <li><a href="https://quickref.me/latex.html" target="_blank">LaTex Quick Reference</a></li>
+    <li><a href="http://www.cs.put.poznan.pl/ksiek/latexmath.html" target="_blank">LaTex Detailed Reference</a></li>
+    <li><a href="https://www.sqlpac.com/en/documents/mathjax-tex-practical-handbook-quick-reference.html" target="_blank">MathJax Reference</a></li>
+</ul>
+
+</body>
+
+    <script>
+        window.mjAPI.handleEditorEvent( (event, cmd) => {
+            switch(cmd.action) {
+                case 'load-svg':
+                    document.getElementById("equation-space").innerHTML = cmd.data;
+                    break;
+                default:
+                    break;    
+            };
+        });
+
+        function convertEqntoSVG() {
+            let asciimath_str = document.getElementById("equation").value;
+            let filepath = document.getElementById("svg-file-path").value;
+            window.mjAPI.makeSVG(asciimath_str, filepath);
+        }
+
+    </script>
+
+</html>
