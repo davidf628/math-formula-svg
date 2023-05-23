@@ -1,4 +1,3 @@
-- Add abiltiy to change rendering engine from TeX to ASCIIMath, etc.
 - Add ability to save and load the previously used directory
 - Add ability to bring up an open dialog to find a path to save file
 - Add ability to load an equation SVG equation file and bring the TeX commands into the editor

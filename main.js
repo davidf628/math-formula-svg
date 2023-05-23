@@ -17,22 +17,25 @@ const createWindow = () => {
   });
 
   ipcMain.on('make-svg', 
-    (event, asciimath_str, filepath) => {
+    (event, options) => {
         mjAPI.typeset({
-            math: asciimath_str,
-            format: "TeX", // or "inline-TeX", "MathML", "AsciiMath", "TeX"
+            math: options.equation_str,
+            format: options.render_engine, // or "inline-TeX", "MathML", "AsciiMath", "TeX"
             svg:true,      // or svg:true, or html:true, or mml:true
           }, function (data) {
             if (!data.errors) {
                 const window = BrowserWindow.getFocusedWindow();
                 window.webContents.send('editor-event', { action: 'load-svg', data: data.svg });
-                fs.writeFile(filepath, data.svg, (err) => {
+                fs.writeFile(options.filepath, data.svg, (err) => {
                     if (err) {
-                      console.error('An error occurred while writing the file:', err);
+                      console.error(`An error occurred while writing the file: ${options.filepath}`);
                     } else {
-                      console.log(`${filepath} has been written successfully!`);
+                      console.log(`${options.filepath} has been written successfully!`);
                     }
                   });
+            } else {
+                const window = BrowserWindow.getFocusedWindow();
+                window.webContents.send('editor-event', { action: 'load-svg', data: data.errors });
             }
           });
 
