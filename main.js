@@ -1,36 +1,38 @@
 // main.js
 
 // Modules to control application life and create native browser window
-const { app, BrowserWindow, ipcMain } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog } = require('electron');
 const path = require('path');
 const mjAPI = require('mathjax-node');
 const fs = require('fs');
 
 const createWindow = () => {
-  // Create the browser window.
-  const mainWindow = new BrowserWindow({
-    width: 800,
-    height: 600,
-    webPreferences: {
-      preload: path.join(__dirname, 'preload.js')
-    }
-  });
+  
+    // Create the browser window.
+    const mainWindow = new BrowserWindow({
+        width: 800,
+        height: 600,
+        webPreferences: {
+            preload: path.join(__dirname, 'preload.js')
+        }
+    });
 
-  ipcMain.on('make-svg', 
-    (event, options) => {
+    ipcMain.on('make-svg', (event, options) => {
+        console.log("got here");
         mjAPI.typeset({
             math: options.equation_str,
             format: options.render_engine, // or "inline-TeX", "MathML", "AsciiMath", "TeX"
             svg:true,      // or svg:true, or html:true, or mml:true
-          }, function (data) {
+        }, function (data) {
             if (!data.errors) {
                 const window = BrowserWindow.getFocusedWindow();
+                const filepath = path.join(options.filepath, options.filename);
                 window.webContents.send('editor-event', { action: 'load-svg', data: data.svg });
-                fs.writeFile(options.filepath, data.svg, (err) => {
+                fs.writeFile(filepath, data.svg, (err) => {
                     if (err) {
-                      console.error(`An error occurred while writing the file: ${options.filepath}`);
+                      console.error(`An error occurred while writing the file: ${filepath}`);
                     } else {
-                      console.log(`${options.filepath} has been written successfully!`);
+                      console.log(`${filepath} has been written successfully!`);
                     }
                   });
             } else {
@@ -41,18 +43,31 @@ const createWindow = () => {
 
     });
 
-  // and load the index.html of the app.
-  mainWindow.loadFile('index.html');
+    ipcMain.on('open-directory', async (event) => {
+        const window = BrowserWindow.getFocusedWindow();
+        const options = {
+            title: 'Open a Directory',
+            properties: ['openDirectory']
+        };
+        const result = await dialog.showOpenDialog(window, options);
+        if (result.filePaths && result.filePaths.length > 0) {
+            window.webContents.send('editor-event', { 
+                action: 'set-directory', 
+                data: result.filePaths[0]
+            })
+        }
+    });
 
-  mjAPI.config({
-    MathJax: {
-        loader: {load: ['input/asciimath', 'output/svg', 'ui/menu']},
-    }
-  });
-  mjAPI.start();
+    // and load the index.html of the app.
+    mainWindow.loadFile('index.html');
 
-  // Open the DevTools.
-  // mainWindow.webContents.openDevTools()
+    mjAPI.config({
+        MathJax: {
+            loader: {load: ['input/asciimath', 'output/svg', 'ui/menu']},   
+        }
+    });
+    mjAPI.start();
+
 }
 
 // This method will be called when Electron has finished

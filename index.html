@@ -12,6 +12,8 @@
 
     <!-- -->
     <title>Formula Creator</title>
+    <link rel="stylesheet" href="./style.css">
+
 </head>
 
 <html>
@@ -31,8 +33,13 @@
 <br/><br/>
 <div id='equation-space'>Preview will display here.</div>
 
-<p>File path to save the SVG output:</p>
-<input type="text" id="svg-file-path" size="80">
+<p>File name for the SVG output:</p>
+<input type="text" id="svg-file-name" size="80"><br/><br/>
+<div class="path-container">
+    <div class="path-column">Path:</div>
+    <div class="path-column" id="svg-path"></div> 
+    <div class="path-column"><input type="button" value="Choose Directory..." onClick="openDirectory()"></div>
+</div>
 <br/><br/>
 Syntax References:
 <ul>
@@ -50,6 +57,9 @@ Syntax References:
                 case 'load-svg':
                     document.getElementById("equation-space").innerHTML = cmd.data;
                     break;
+                case 'set-directory':
+                    document.getElementById("svg-path").innerText = cmd.data;
+                    break;
                 default:
                     break;    
             };
@@ -58,10 +68,16 @@ Syntax References:
         function convertEqntoSVG() {
             const options = {
                 equation_str: document.getElementById("equation").value,
-                filepath: document.getElementById("svg-file-path").value,
+                filename: document.getElementById("svg-file-name").value,
+                filepath: document.getElementById("svg-path").innerText,
                 render_engine: document.getElementById("render-engine").value
             }
+            console.log(options);
             window.mjAPI.makeSVG(options);
+        }
+
+        function openDirectory() {
+            window.mjAPI.openDirectory();
         }
 
     </script>
