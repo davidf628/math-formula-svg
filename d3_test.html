@@ -1,0 +1,86 @@
+
+<!DOCTYPE html>
+<html lang="en-US">
+
+<head>
+
+    <title>Histogram Creator</title>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Security-Policy" >
+    <link rel="stylesheet" href="./style.css">
+
+    <script src="d3.js"></script>
+
+</head>
+
+<body>
+    <h1>Create a Histogram</h1>
+
+    
+
+
+</body>
+
+<script>
+    // Sample data
+    var data = [
+        { label: 'Cow', value: 5 },
+        { label: 'Monkey', value: 10 },
+        { label: 'Giraffe', value: 15 },
+        { label: 'Antelope', value: 20 },
+        { label: 'Cat', value: 25 }
+    ];
+
+    // Set up SVG container
+    var svg = d3.select("body")
+        .append("svg")
+        .attr("width", 400)
+        .attr("height", 300)
+        .attr("background-color", "red");
+
+    // Set up margin and dimensions
+    var margin = { top: 20, right: 20, bottom: 20, left: 20 };
+    var width = svg.attr("width") - margin.left - margin.right;
+    var height = svg.attr("height") - margin.top - margin.bottom;
+
+    // Create x scale
+    var x = d3.scaleBand()
+        .domain(data.map((d,i) => d.label))
+        .range([0, width])
+        .padding(0.1);
+
+//    // Generate histogram bins
+//    var bins = d3.histogram()
+//        .domain(x.domain())
+//        .thresholds(x.ticks(10))
+//        (data);
+
+    // Create y scale
+    var y = d3.scaleLinear()
+        .domain([0, d3.max(data, (d, i) => d.value)])
+        .range([height, 0]);
+
+    // Create x-axis
+    svg.append("g")
+        .attr("transform", "translate(" + margin.left + "," + (height + margin.top) + ")")
+        .call(d3.axisBottom(x));
+
+    // Create y-axis
+    svg.append("g")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+        .call(d3.axisLeft(y));
+
+    // Create bars
+    svg.selectAll("rect")
+        .data(data)
+        .enter()
+        .append("rect")
+        .attr("x", (d, i) => { return margin.left + x(d.label); })
+        .attr("y", (d, i) => { return y(d.value) + margin.bottom; })
+        .attr("width", (d) => { return x.bandwidth(); })
+        .attr("height", (d) => { return height - y(d.value); })
+        .attr("fill", "steelblue")
+        .attr("stroke", "black");
+</script>
+
+</html>
