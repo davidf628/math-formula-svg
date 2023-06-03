@@ -15,77 +15,95 @@
 
 <body>
     <h1>Create a Histogram</h1>
-
-    
-
-
+    <svg></svg>
 </body>
 
 <script>
+
+    let opt = {
+        width: 400,
+        height: 300,
+        top_margin: 1,
+        bottom_margin: 70,
+        left_margin: 30,
+        right_margin: 1,
+        show_x_labels: false,
+        show_y_labels: false,
+        padding: 0,
+    }
+
     // Sample data
-    var data = [
-        { label: 'Very Likely', value: 4 },
-        { label: 'Likely', value: 13 },
-        { label: 'Unlikely', value: 6 },
-        { label: 'Very Unlikely', value: 2 },
+    const data = [
+        { index: 0, label: 'Very Likely', value: 2 },
+        { index: 1, label: 'Likely', value: 4 },
+        { index: 2, label: 'Unlikely', value: 6 },
+        { index: 3, label: 'Very Unlikely', value: 3 },
+        { index: 4, label: 'Very Unlikely', value: 4 },
+        { index: 5, label: 'Very Unlikely', value: 9 },
+        { index: 6, label: 'Very Unlikely', value: 12 },
+        { index: 7, label: 'Very Unlikely', value: 5 },
+        { index: 8, label: 'Very Unlikely', value: 2 },
     ];
 
     // Set up SVG container
-    var svg = d3.select("body")
-        .append("svg")
-        .attr("width", 400)
-        .attr("height", 300)
-        .attr("background-color", "red");
+    let svg = d3.select("body svg")
+        .attr("width", opt.width)
+        .attr("height", opt.height);
+
+    opt.bottom_margin = opt.show_x_labels ? opt.bottom_margin : 1;
+    opt.left_margin = opt.show_y_labels ? opt.left_margin : 1;
 
     // Set up margin and dimensions
-    var margin = { top: 20, right: 20, bottom: 70, left: 30 };
-    var width = svg.attr("width") - margin.left - margin.right;
-    var height = svg.attr("height") - margin.top - margin.bottom;
+    const width = svg.attr("width") - opt.left_margin - opt.right_margin;
+    const height = svg.attr("height") - opt.top_margin - opt.bottom_margin;
 
     // Create x scale
-    var x = d3.scaleBand()
-        .domain(data.map((d,i) => d.label))
+    let x = d3.scaleBand()
+        .domain( data.map((d, i) => getLabel(d)) )
         .range([0, width])
-        .padding(0);
-
-//    // Generate histogram bins
-//    var bins = d3.histogram()
-//        .domain(x.domain())
-//        .thresholds(x.ticks(10))
-//        (data);
+        .padding(opt.padding);
 
     // Create y scale
-    var y = d3.scaleLinear()
+    let y = d3.scaleLinear()
         .domain([0, d3.max(data, (d, i) => d.value)])
         .range([height, 0]);
 
-    // Create x-axis
-    svg.append("g")
-        .attr('id', 'bottom-axis')
-        .attr("transform", "translate(" + margin.left + "," + (height + margin.top) + ")")
-        .call(d3.axisBottom(x));
+    if (opt.show_x_labels) {
+        // Create x-axis
+        svg.append("g")
+            .attr('id', 'bottom-axis')
+            .attr("transform", "translate(" + opt.left_margin + "," + (height + opt.top_margin) + ")")
+            .call(d3.axisBottom(x));
+        
+        // Rotate titles
+        let bottom_axis_text = d3.selectAll("#bottom-axis text")
+        bottom_axis_text.attr('transform', 'rotate(45)').attr('text-anchor', 'start')
+    }
 
-    // Rotate titles
-    let bottom_axis_text = d3.selectAll("#bottom-axis text")
-    bottom_axis_text.attr('transform', 'rotate(45)').attr('text-anchor', 'start')
-
-    // Create y-axis
-    svg.append("g")
-        .attr('id', 'left-axis')
-        .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
-        .call(d3.axisLeft(y));
+    if (opt.show_y_labels) {
+        // Create y-axis
+        svg.append("g")
+            .attr('id', 'left-axis')
+            .attr("transform", "translate(" + opt.left_margin + "," + opt.top_margin + ")")
+            .call(d3.axisLeft(y));
+    }
 
     // Create bars
     svg.selectAll("rect")
         .data(data)
         .enter()
         .append("rect")
-        .attr("x", (d, i) => { return margin.left + x(d.label); })
-        .attr("y", (d, i) => { return y(d.value) + margin.top; })
+        .attr("x", (d, i) => { return opt.left_margin + x(getLabel(d)); })
+        .attr("y", (d, i) => { return y(d.value) + opt.top_margin; })
         .attr("width", (d) => { return x.bandwidth(); })
         .attr("height", (d) => { return height - y(d.value); })
         .attr("fill", "steelblue")
         .attr("stroke", "black");
+
+    function getLabel(data) {
+        return opt.show_x_labels ? data.label : data.index;
+    }
+
 </script>
 
 </html>

@@ -1,0 +1,129 @@
+
+<!DOCTYPE html>
+<html lang="en-US">
+
+<head>
+
+    <title>Line Chart Creator</title>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Security-Policy" >
+    <link rel="stylesheet" href="./style.css">
+
+    <script src="d3.js"></script>
+
+</head>
+
+<body>
+    <svg></svg>
+</body>
+
+<script>
+
+    let opt = {
+        width: 500,
+        height: 400,
+        top_margin: 30,
+        bottom_margin: 50,
+        left_margin: 50,
+        right_margin: 20,
+        title_y: 20,
+        show_x_labels: false,
+        show_y_labels: false,
+        padding: 0,
+    }
+
+    const data = [
+        [1,1], [12,20], [24,36],
+        [32, 50], [40, 70], [50, 100],
+        [55, 106], [65, 123], [73, 130],
+        [78, 134], [83, 136], [89, 138],
+        [100, 140]
+    ];
+    
+    let svg = d3.select("svg")
+        .attr("width", opt.width)
+        .attr("height", opt.height);
+    
+     // Set up margin and dimensions
+     const width = svg.attr("width") - opt.left_margin - opt.right_margin;
+     const height = svg.attr("height") - opt.top_margin - opt.bottom_margin;
+
+    // Create x scale
+    let xScale = d3.scaleLinear()
+        .domain( [0, d3.max(data, (d, i) => d[0])] )
+        .range([0, width])
+
+    // Create y scale
+    let yScale = d3.scaleLinear()
+        .domain( [0, d3.max(data, (d, i) => d[1])] )
+        .range([height, 0]); 
+
+    let g = svg
+        .append("g")
+        .attr("transform", `translate(${opt.left_margin},${opt.top_margin})`);
+    
+    // Title
+    svg.append('text')
+        .attr('x', width/2 + opt.left_margin)
+        .attr('y', opt.title_y)
+        .attr('text-anchor', 'middle')
+        .style('font-family', 'Helvetica')
+        .style('font-size', 20)
+        .text('Line Chart');
+            
+    // X label
+    svg.append('text')
+        .attr('x', width/2 + opt.left_margin)
+        .attr('y', height + opt.bottom_margin + 15)
+        .attr('text-anchor', 'middle')
+        .style('font-family', 'Helvetica')
+        .style('font-size', 12)
+        .text('Independent');
+            
+    // Y label
+    svg.append('text')
+        .attr('text-anchor', 'middle')
+        .attr('transform', 'translate(15, ' + (height/2 + opt.top_margin) + ')rotate(-90)')
+        .style('font-family', 'Helvetica')
+        .style('font-size', 12)
+        .text('Dependent');
+    
+    // Add x-axis
+    g.append("g")
+        .attr("transform", "translate(0," + height + ")")
+        .call(d3.axisBottom(xScale));
+            
+    // Add y-axis        
+    g.append("g")
+        .call(d3.axisLeft(yScale));
+            
+    // Add dots
+    svg.append('g')
+        .selectAll("dot")
+        .data(data)
+        .enter()
+        .append("circle")
+        .attr("cx", function (d) { return xScale(d[0]); } )
+        .attr("cy", function (d) { return yScale(d[1]); } )
+        .attr("r", 3)
+        .attr("transform", "translate(" + opt.left_margin + "," + opt.top_margin + ")")
+        .style("fill", "#0000CC");
+    
+    // Add Lines     
+    let line = d3.line()
+        .x(function(d) { return xScale(d[0]); }) 
+        .y(function(d) { return yScale(d[1]); }) 
+        .curve(d3.curveMonotoneX)
+            
+    svg.append("path")
+        .datum(data) 
+        .attr("class", "line") 
+        .attr("transform", "translate(" + opt.left_margin + "," + opt.top_margin + ")")
+        .attr("d", line)
+        .style("fill", "none")
+        .style("stroke", "#0000CC")
+        .style("stroke-width", "2");
+      
+</script>
+
+</html>
