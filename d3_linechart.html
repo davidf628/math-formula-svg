@@ -83,7 +83,6 @@
     let chart_area = svg
         .append('g')
         .attr('id', 'chart-area')
-        //.attr("transform", `translate(${opt.chart_area.left_margin},${opt.chart_area.top_margin})`);
 
     // Set up fonts first in order to get metrics
     let chart_title = d3.select('svg')
@@ -124,7 +123,11 @@
     // Add x-axis
     let x_axis = chart_area.append('g')
         .attr('id', 'x-axis')
-        .call(d3.axisBottom(xScale));
+        .call(d3.axisBottom(xScale).tickFormat(d3.format("$")));
+    
+    d3.selectAll('#x-axis text')
+        .attr('transform', 'rotate(45)')
+        .attr('text-anchor', 'start')
     
     // Add y-axis        
     let y_axis = chart_area.append('g')
@@ -171,7 +174,7 @@
     // Redraw the axes, now that we know the dimensions
     x_axis
         .attr('transform', `translate(0,${opt.chart_area.bounds.height})`)
-        .call(d3.axisBottom(xScale));
+        .call(d3.axisBottom(xScale).tickFormat(d3.format("$")));
 
     y_axis
         .call(d3.axisLeft(yScale));

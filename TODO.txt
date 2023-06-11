@@ -6,6 +6,10 @@ FORMULA CREATOR
 - Add ability to drag/drop an SVG equation file and bring the TeX commands into the editor
 
 CHART CREATOR
+- Add background color for chart
+- Add horizontal gridlines for chart
+- Allow for tick formats and rotations of x-axis labels
+- Allow for indicating the spacing of ticks: .tickValues(d3.range(min, max, step))
 - Make the interface in electron for the chart creation
 - Add ability to format chart axis labels
 - Add ability to add labels to histograms
