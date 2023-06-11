@@ -1,4 +1,15 @@
+FORMULA CREATOR
+
 - Add ability to save and load the previously used directory
 - Add ability to bring up an open dialog to find a path to save file
 - Add ability to load an equation SVG equation file and bring the TeX commands into the editor
 - Add ability to drag/drop an SVG equation file and bring the TeX commands into the editor
+
+CHART CREATOR
+- Make the interface in electron for the chart creation
+- Add ability to format chart axis labels
+- Add ability to add labels to histograms
+- Add ability to add multiple data sets to line chart
+- Make pie chart Creator
+- Make dot plot Creator
+- Make box plot creator
