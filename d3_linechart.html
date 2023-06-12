@@ -22,7 +22,6 @@
     let opt = {
         width: 500,
         height: 400,
-        color: '#0000CC',
         chart_area: {
             bounds: {},
         },
@@ -69,11 +68,28 @@
         }
     }
 
-    const data = [
-        [192, 0], [(350+664)/2, 4], [(665+979)/2,12], [(980+1294)/2,17],
-        [(1295+1609)/2, 23], [(1610+1924)/2, 23], [(1925+2239)/2, 23],
-        [(2240+2554)/2, 24]
+    const data = [ 
+        { 
+            title: 'list 1',
+            color: '#0000CC',
+            points: [ 
+                [192, 0], [(350+664)/2, 4], [(665+979)/2,12], [(980+1294)/2,17],
+                [(1295+1609)/2, 23], [(1610+1924)/2, 23], [(1925+2239)/2, 23],
+                [(2240+2554)/2, 24] 
+            ]
+        },
+        { 
+            title: 'list 2',
+            color: '#CC0000',
+            points: [ 
+                [192, 2], [(350+664)/2, 10], [(665+979)/2,9], [(980+1294)/2,11],
+                [(1295+1609)/2, 4], [(1610+1924)/2, 16], [(1925+2239)/2, 19],
+                [(2240+2554)/2, 17] 
+            ]
+        }
     ];
+
+    let default_margin = 5;
 
     // Set up margin and dimensions
     let svg = d3.select('svg')
@@ -85,14 +101,19 @@
         .attr('id', 'chart-area')
 
     // Set up fonts first in order to get metrics
-    let chart_title = d3.select('svg')
-        .append('text')
-        .attr('id', 'chart-title')
-        .style('font-family', opt.chart_title.font)
-        .style('font-size', opt.chart_title.size)
-        .style('font-weight', opt.chart_title.weight)
-        .text(opt.chart_title.text);
-    opt.chart_title.text_bounds = document.getElementById('chart-title').getBBox();
+    let chart_title;
+    if (opt.chart_title.visible) {
+        chart_title = d3.select('svg')
+            .append('text')
+            .attr('id', 'chart-title')
+            .style('font-family', opt.chart_title.font)
+            .style('font-size', opt.chart_title.size)
+            .style('font-weight', opt.chart_title.weight)
+            .text(opt.chart_title.text);
+        opt.chart_title.text_bounds = document.getElementById('chart-title').getBBox();
+    } else {
+        opt.chart_title.text_bounds = { x: 0, y: 0, width: 0, height: 0 };
+    }
 
     let x_axis_title = d3.select('svg')
         .append('text')
@@ -114,11 +135,11 @@
 
     // Create x scale
     let xScale = d3.scaleLinear()
-        .domain( [opt.scale_pad.x_low, d3.max(data, (d, i) => d[0]) + opt.scale_pad.x_high] );
+        .domain( [opt.scale_pad.x_low, dataMax(data, 'x') + opt.scale_pad.x_high] );
 
     // Create y scale
     let yScale = d3.scaleLinear()
-        .domain( [opt.scale_pad.y_low, d3.max(data, (d, i) => d[1]) + opt.scale_pad.y_high] );
+        .domain( [opt.scale_pad.y_low, dataMax(data, 'y') + opt.scale_pad.y_high] );
 
     // Add x-axis
     let x_axis = chart_area.append('g')
@@ -138,9 +159,9 @@
     let y_axis_width = document.getElementById('y-axis').getBBox().width;
 
     // Calculate chart area dimensions
-    opt.chart_area.top_margin = opt.chart_title.pad * 2 + opt.chart_title.text_bounds.height;
+    opt.chart_area.top_margin = opt.chart_title.visible ? opt.chart_title.pad * 2 + opt.chart_title.text_bounds.height : default_margin;
     opt.chart_area.bottom_margin = opt.x_title.pad * 2 + opt.x_title.text_bounds.height + x_axis_height;
-    opt.chart_area.right_margin = 0;
+    opt.chart_area.right_margin = default_margin;
     opt.chart_area.left_margin = opt.y_title.pad * 2 + opt.y_title.text_bounds.height + y_axis_width;
 
     opt.chart_area.bounds.x = opt.chart_area.left_margin;
@@ -180,16 +201,15 @@
         .call(d3.axisLeft(yScale));
 
     // Next, reposition the labels
-    chart_title
-        .attr('x', opt.chart_title.bounds.xmid)
-        .attr('y', opt.chart_title.bounds.ymid)
-        .attr('text-anchor', 'middle')
-        .attr('dominant-baseline', 'middle')
-        .attr('fill', opt.chart_title.color)
+    if (opt.chart_title.visible) {
+        chart_title
+            .attr('x', opt.chart_title.bounds.xmid)
+            .attr('y', opt.chart_title.bounds.ymid)
+            .attr('text-anchor', 'middle')
+            .attr('dominant-baseline', 'middle')
+            .attr('fill', opt.chart_title.color)
+    }
 
-    svg_rectangle_bounds(svg, opt.chart_title.bounds);
-    svg_line(svg, opt.chart_title.bounds.left, opt.chart_title.bounds.ymid, opt.chart_title.bounds.right, opt.chart_title.bounds.ymid);
-    
     // X label
     x_axis_title
         .attr('x', opt.x_title.bounds.xmid)
@@ -212,31 +232,34 @@
 	svg_line(svg, opt.y_title.bounds.left, opt.y_title.bounds.ymid, opt.y_title.bounds.right, opt.y_title.bounds.ymid)
     svg_rectangle_bounds(svg, opt.y_title.bounds);
 
-    // Add dots
-    svg.append('g')
-        .selectAll('dot')
-        .data(data)
-        .enter()
-        .append('circle')
-        .attr('cx', (d,i) => xScale(d[0]) )
-        .attr('cy', (d,i) => yScale(d[1]) )
-        .attr('r', 3)
-        .attr('transform', `translate(${opt.chart_area.bounds.left},${opt.chart_area.bounds.top})`)
-        .style('fill', opt.color);
-    
-    // Add Lines     
-    let line = d3.line()
-        .x( (d,i) => xScale(d[0]) ) 
-        .y( (d,i) => yScale(d[1]) ) 
-            
-    svg.append('path')
-        .datum(data) 
-        .attr('class', 'line') 
-        .attr('transform', `translate(${opt.chart_area.bounds.left},${opt.chart_area.bounds.top})`)
-        .attr('d', line)
-        .style('fill', 'none')
-        .style('stroke', opt.color)
-        .style('stroke-width', '2');
+    // Add plots
+
+    for(dataset of data) {
+        svg.append('g')
+            .selectAll('dot')
+            .data(dataset.points)
+            .enter()
+            .append('circle')
+            .attr('cx', (d,i) => xScale(d[0]) )
+            .attr('cy', (d,i) => yScale(d[1]) )
+            .attr('r', 3)
+            .attr('transform', `translate(${opt.chart_area.bounds.left},${opt.chart_area.bounds.top})`)
+            .style('fill', dataset.color);
+        
+        // Add Lines     
+        let line = d3.line()
+            .x( (d,i) => xScale(d[0]) ) 
+            .y( (d,i) => yScale(d[1]) ) 
+                
+        svg.append('path')
+            .datum(dataset.points) 
+            .attr('class', 'line') 
+            .attr('transform', `translate(${opt.chart_area.bounds.left},${opt.chart_area.bounds.top})`)
+            .attr('d', line)
+            .style('fill', 'none')
+            .style('stroke', dataset.color)
+            .style('stroke-width', '2');
+    }
       
 	function svg_rectangle(svg, x, y, width, height, opt) {
 	
@@ -298,6 +321,37 @@
         return bounds;
     }
 	
+    function dataMax(data, variable) {
+
+        let max = Number.NEGATIVE_INFINITY;
+        let dim = variable == 'x' ? 0 : variable == 'y' ? 1 : -1;
+
+        for(set of data) {
+            for(coord of set.points) {
+                if(coord[dim] > max) {
+                    max = coord[dim]
+                }
+            }
+        }
+
+        return max;
+        
+    }
+
+    function dataMin(data, variable) {
+
+        let min = Number.POSITIVE_INFINITY;
+        let dim = variable == 'x' ? 0 : variable == 'y' ? 1 : -1;
+        
+        for(set of data) {
+            for(coord of set.points) {
+                if(coord[dim] < min) {
+                    min = coord[dim]
+                }
+            }
+        }
+        return min;
+    }
 		  
 </script>
 
