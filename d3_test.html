@@ -23,26 +23,19 @@
     let opt = {
         width: 400,
         height: 300,
-        top_margin: 1,
+        top_margin: 10,
         bottom_margin: 70,
-        left_margin: 30,
+        left_margin: 40,
         right_margin: 1,
-        show_x_labels: false,
-        show_y_labels: false,
-        padding: 0,
+        show_x_labels: true,
+        show_y_labels: true,
+        padding: 0.3,
     }
 
     // Sample data
     const data = [
-        { index: 0, label: 'Very Likely', value: 2 },
-        { index: 1, label: 'Likely', value: 4 },
-        { index: 2, label: 'Unlikely', value: 6 },
-        { index: 3, label: 'Very Unlikely', value: 3 },
-        { index: 4, label: 'Very Unlikely', value: 4 },
-        { index: 5, label: 'Very Unlikely', value: 9 },
-        { index: 6, label: 'Very Unlikely', value: 12 },
-        { index: 7, label: 'Very Unlikely', value: 5 },
-        { index: 8, label: 'Very Unlikely', value: 2 },
+        { index: 0, label: 'Ozempic', value: 23 },
+        { index: 1, label: 'Placebo', value: 12 },
     ];
 
     // Set up SVG container
@@ -65,7 +58,7 @@
 
     // Create y scale
     let y = d3.scaleLinear()
-        .domain([0, d3.max(data, (d, i) => d.value)])
+        .domain([0, d3.max(data, (d, i) => d.value)+5])
         .range([height, 0]);
 
     if (opt.show_x_labels) {
@@ -77,7 +70,7 @@
         
         // Rotate titles
         let bottom_axis_text = d3.selectAll("#bottom-axis text")
-        bottom_axis_text.attr('transform', 'rotate(45)').attr('text-anchor', 'start')
+        //bottom_axis_text.attr('transform', 'rotate(45)').attr('text-anchor', 'start')
     }
 
     if (opt.show_y_labels) {
@@ -85,7 +78,7 @@
         svg.append("g")
             .attr('id', 'left-axis')
             .attr("transform", "translate(" + opt.left_margin + "," + opt.top_margin + ")")
-            .call(d3.axisLeft(y));
+            .call(d3.axisLeft(y).tickFormat( d => `${d} %`));
     }
 
     // Create bars

@@ -22,6 +22,10 @@
     let opt = {
         width: 500,
         height: 400,
+        background_color: 'white',
+        border_color: 'white',
+        show_x_labels: false,
+        show_y_labels: false,
         chart_area: {
             bounds: {},
         },
@@ -58,8 +62,16 @@
             text_bounds: {},
             bounds: {}
         },
-        show_x_labels: false,
-        show_y_labels: false,
+        x_axis: {
+            visible: true,
+            tick_format: '$,',
+            label_rotation: 45,
+        },
+        y_axis: {
+            visible: true,
+            grid: true,
+            tick_format: '',
+        },
         scale_pad: {
             x_low: 0,
             y_low: 0,
@@ -95,10 +107,18 @@
     let svg = d3.select('svg')
         .attr('width', opt.width)
         .attr('height', opt.height);
+        
+    let background = svg.append('rect')
+        .attr('x', 0)
+        .attr('y', 0)
+        .attr('width', opt.width)
+        .attr('height', opt.height)
+        .attr('fill', opt.background_color)
+        .attr('stroke', opt.border_color);
 
     let chart_area = svg
         .append('g')
-        .attr('id', 'chart-area')
+        .attr('id', 'chart-area');
 
     // Set up fonts first in order to get metrics
     let chart_title;
@@ -115,23 +135,33 @@
         opt.chart_title.text_bounds = { x: 0, y: 0, width: 0, height: 0 };
     }
 
-    let x_axis_title = d3.select('svg')
-        .append('text')
-        .attr('id', 'x-axis-title')
-        .style('font-family', opt.x_title.font)
-        .style('font-size', opt.x_title.size)
-        .style('font-weight', opt.x_title.weight)
-        .text(opt.x_title.text);
-    opt.x_title.text_bounds = document.getElementById('x-axis-title').getBBox();
+    let x_axis_title;
+    if (opt.x_title.visible) {
+        x_axis_title = d3.select('svg')
+            .append('text')
+            .attr('id', 'x-axis-title')
+            .style('font-family', opt.x_title.font)
+            .style('font-size', opt.x_title.size)
+            .style('font-weight', opt.x_title.weight)
+            .text(opt.x_title.text);
+        opt.x_title.text_bounds = document.getElementById('x-axis-title').getBBox();
+    } else {
+        opt.x_title.text_bounds = { x: 0, y: 0, width: 0, height: 0 };
+    }
 
-    let y_axis_title = d3.select('svg')
-        .append('text')
-        .attr('id', 'y-axis-title')
-        .style('font-family', opt.y_title.font)
-        .style('font-size', opt.y_title.size)
-        .style('font-weight', opt.y_title.weight)
-        .text(opt.y_title.text);
-    opt.y_title.text_bounds = document.getElementById('y-axis-title').getBBox();
+    let y_axis_title; 
+    if (opt.y_title.visible) {
+        y_axis_title = d3.select('svg')
+            .append('text')
+            .attr('id', 'y-axis-title')
+            .style('font-family', opt.y_title.font)
+            .style('font-size', opt.y_title.size)
+            .style('font-weight', opt.y_title.weight)
+            .text(opt.y_title.text);
+        opt.y_title.text_bounds = document.getElementById('y-axis-title').getBBox();
+    } else {
+        opt.y_title.text_bounds = { x: 0, y: 0, width: 0, height: 0 }
+    }
 
     // Create x scale
     let xScale = d3.scaleLinear()
@@ -144,25 +174,29 @@
     // Add x-axis
     let x_axis = chart_area.append('g')
         .attr('id', 'x-axis')
-        .call(d3.axisBottom(xScale).tickFormat(d3.format("$")));
+        .call(d3
+            .axisBottom(xScale)
+            .tickFormat(d3.format(opt.x_axis.tick_format)));
     
-    d3.selectAll('#x-axis text')
-        .attr('transform', 'rotate(45)')
-        .attr('text-anchor', 'start')
-    
+    if (opt.x_axis.label_rotation != 0) {
+        d3.selectAll('#x-axis text')
+            .attr('transform', `rotate(${opt.x_axis.label_rotation})`)
+            .attr('text-anchor', 'start');
+    }
+
     // Add y-axis        
     let y_axis = chart_area.append('g')
         .attr('id', 'y-axis')
-        .call(d3.axisLeft(yScale));
+        .call(d3.axisLeft(yScale).tickFormat(d3.format(opt.y_axis.tick_format)));
 
     let x_axis_height = document.getElementById('x-axis').getBBox().height;
     let y_axis_width = document.getElementById('y-axis').getBBox().width;
 
     // Calculate chart area dimensions
     opt.chart_area.top_margin = opt.chart_title.visible ? opt.chart_title.pad * 2 + opt.chart_title.text_bounds.height : default_margin;
-    opt.chart_area.bottom_margin = opt.x_title.pad * 2 + opt.x_title.text_bounds.height + x_axis_height;
+    opt.chart_area.bottom_margin = opt.x_title.visible ? opt.x_title.pad * 2 + opt.x_title.text_bounds.height + x_axis_height : x_axis_height + default_margin;
     opt.chart_area.right_margin = default_margin;
-    opt.chart_area.left_margin = opt.y_title.pad * 2 + opt.y_title.text_bounds.height + y_axis_width;
+    opt.chart_area.left_margin = opt.y_title.visible ? opt.y_title.pad * 2 + opt.y_title.text_bounds.height + y_axis_width : y_axis_width + default_margin;
 
     opt.chart_area.bounds.x = opt.chart_area.left_margin;
     opt.chart_area.bounds.y = opt.chart_area.top_margin;
@@ -195,12 +229,12 @@
     // Redraw the axes, now that we know the dimensions
     x_axis
         .attr('transform', `translate(0,${opt.chart_area.bounds.height})`)
-        .call(d3.axisBottom(xScale).tickFormat(d3.format("$")));
+        .call(d3.axisBottom(xScale).tickFormat(d3.format(opt.x_axis.tick_format)));
 
     y_axis
-        .call(d3.axisLeft(yScale));
+        .call(d3.axisLeft(yScale).tickFormat(d3.format(opt.y_axis.tick_format)));
 
-    // Next, reposition the labels
+    // Chart Title
     if (opt.chart_title.visible) {
         chart_title
             .attr('x', opt.chart_title.bounds.xmid)
@@ -211,30 +245,24 @@
     }
 
     // X label
-    x_axis_title
-        .attr('x', opt.x_title.bounds.xmid)
-        .attr('y', opt.x_title.bounds.ymid)
-        .attr('text-anchor', 'middle')
-        .attr('dominant-baseline', 'middle');
-
-    svg_rectangle_bounds(svg, opt.x_title.bounds)
-    console.log(opt.x_title.bounds);
-    svg_line(svg, opt.x_title.bounds.left, opt.x_title.bounds.ymid, opt.x_title.bounds.right, opt.x_title.bounds.ymid)
+    if (opt.x_title.visible) {
+        x_axis_title
+            .attr('x', opt.x_title.bounds.xmid)
+            .attr('y', opt.x_title.bounds.ymid)
+            .attr('text-anchor', 'middle')
+            .attr('dominant-baseline', 'middle');
+    }
 
     // Y label
-    y_axis_title
-        .attr('text-anchor', 'middle')
-        .attr('dominant-baseline', 'middle')
-        .attr('transform',`translate(${opt.y_title.bounds.xmid}, ${opt.y_title.bounds.ymid})rotate(-90)`);
-    
-    console.log(opt.y_title.bounds);
-	svg_line(svg, opt.y_title.bounds.xmid, opt.y_title.bounds.top, opt.y_title.bounds.xmid, opt.y_title.bounds.bottom);
-	svg_line(svg, opt.y_title.bounds.left, opt.y_title.bounds.ymid, opt.y_title.bounds.right, opt.y_title.bounds.ymid)
-    svg_rectangle_bounds(svg, opt.y_title.bounds);
+    if (opt.y_title.visible) {
+        y_axis_title
+            .attr('text-anchor', 'middle')
+            .attr('dominant-baseline', 'middle')
+            .attr('transform',`translate(${opt.y_title.bounds.xmid}, ${opt.y_title.bounds.ymid})rotate(-90)`);
+    }
 
     // Add plots
-
-    for(dataset of data) {
+    for (dataset of data) {
         svg.append('g')
             .selectAll('dot')
             .data(dataset.points)
