@@ -24,8 +24,6 @@
         height: 400,
         background_color: 'white',
         border_color: 'white',
-        show_x_labels: false,
-        show_y_labels: false,
         chart_area: {
             bounds: {},
         },
@@ -66,11 +64,18 @@
             visible: true,
             tick_format: '$,',
             label_rotation: 45,
+            grid_color: '#e0e0e0',
+            manual_ticks: true,
+            scale: {
+                min: 0,
+                max: 2600,
+                step: 500
+            }
         },
         y_axis: {
-            visible: true,
-            grid: true,
+            visible: false,
             tick_format: '',
+            grid_color: '#e0e0e0'
         },
         scale_pad: {
             x_low: 0,
@@ -172,25 +177,43 @@
         .domain( [opt.scale_pad.y_low, dataMax(data, 'y') + opt.scale_pad.y_high] );
 
     // Add x-axis
-    let x_axis = chart_area.append('g')
-        .attr('id', 'x-axis')
-        .call(d3
-            .axisBottom(xScale)
-            .tickFormat(d3.format(opt.x_axis.tick_format)));
-    
-    if (opt.x_axis.label_rotation != 0) {
-        d3.selectAll('#x-axis text')
-            .attr('transform', `rotate(${opt.x_axis.label_rotation})`)
-            .attr('text-anchor', 'start');
+    let x_axis, x_axis_height;
+    if (opt.x_axis.visible) {
+
+        const scale = opt.x_axis.manual_ticks 
+            ? d3.axisBottom(xScale)
+                .tickFormat(d3.format(opt.x_axis.tick_format))
+                .tickValues(d3.range(opt.x_axis.scale.min, opt.x_axis.scale.max, opt.x_axis.scale.step))
+            : d3.axisBottom(xScale)
+                .tickFormat(d3.format(opt.x_axis.tick_format));
+
+        x_axis = chart_area.append('g')
+            .attr('id', 'x-axis')
+            .call(scale);
+        
+        if (opt.x_axis.label_rotation != 0) {
+            d3.selectAll('#x-axis text')
+                .attr('transform', `rotate(${opt.x_axis.label_rotation})`)
+                .attr('text-anchor', 'start');
+        }
+        x_axis_height = document.getElementById('x-axis').getBBox().height;
+        opt.x_axis.grid_color = undefined;
+    } else {
+        x_axis_height = default_margin;
     }
 
-    // Add y-axis        
-    let y_axis = chart_area.append('g')
-        .attr('id', 'y-axis')
-        .call(d3.axisLeft(yScale).tickFormat(d3.format(opt.y_axis.tick_format)));
+    // Add y-axis  
+    let y_axis, y_axis_width;   
+    if (opt.y_axis.visible) {   
+        y_axis = chart_area.append('g')
+            .attr('id', 'y-axis')
+            .call(d3.axisLeft(yScale).tickFormat(d3.format(opt.y_axis.tick_format)));
 
-    let x_axis_height = document.getElementById('x-axis').getBBox().height;
-    let y_axis_width = document.getElementById('y-axis').getBBox().width;
+        y_axis_width = document.getElementById('y-axis').getBBox().width;
+        opt.y_axis.grid_color = undefined;
+    } else {
+        y_axis_width = default_margin;
+    }
 
     // Calculate chart area dimensions
     opt.chart_area.top_margin = opt.chart_title.visible ? opt.chart_title.pad * 2 + opt.chart_title.text_bounds.height : default_margin;
@@ -222,17 +245,56 @@
     opt.y_title.bounds.height = opt.chart_area.bounds.height;    
     calculateBounds(opt.y_title.bounds);
 
-    chart_area.attr("transform", `translate(${opt.chart_area.bounds.left},${opt.chart_area.bounds.top})`);
-    xScale.range([0, opt.chart_area.bounds.width]);
-    yScale.range([opt.chart_area.bounds.height, 0]);
+    chart_area
+        .attr("transform", `translate(${opt.chart_area.bounds.left},${opt.chart_area.bounds.top})`);
+    
+    xScale
+        .range([0, opt.chart_area.bounds.width]);
+
+    yScale
+        .range([opt.chart_area.bounds.height, 0]);
 
     // Redraw the axes, now that we know the dimensions
-    x_axis
-        .attr('transform', `translate(0,${opt.chart_area.bounds.height})`)
-        .call(d3.axisBottom(xScale).tickFormat(d3.format(opt.x_axis.tick_format)));
+    if (opt.x_axis.visible) {
+        const scale = opt.x_axis.manual_ticks 
+            ? d3.axisBottom(xScale)
+                .tickFormat(d3.format(opt.x_axis.tick_format))
+                .tickValues(d3.range(opt.x_axis.scale.min, opt.x_axis.scale.max, opt.x_axis.scale.step))
+            : d3.axisBottom(xScale)
+                .tickFormat(d3.format(opt.x_axis.tick_format));
+        x_axis
+            .attr('transform', `translate(0,${opt.chart_area.bounds.height})`)
+            .call(scale);
+    }
 
-    y_axis
-        .call(d3.axisLeft(yScale).tickFormat(d3.format(opt.y_axis.tick_format)));
+    // Draw x-axis grid lines, skip the first one
+    if (opt.x_axis.grid_color != undefined) {  
+        d3.selectAll('#x-axis .tick').filter( (d,i) => i != 0)
+            .append('line')
+            .classed('grid-line', true)
+            .attr('stroke', opt.x_axis.grid_color)
+            .attr('x1', 0.5)
+            .attr('y1', 0)
+            .attr('x2', 0.5)
+            .attr('y2', -opt.chart_area.bounds.height)
+    }
+
+    if (opt.y_axis.visible) {
+        y_axis
+            .call(d3.axisLeft(yScale).tickFormat(d3.format(opt.y_axis.tick_format)));
+    }
+
+    // Draw y-axis grid lines, skip the first one
+    if (opt.y_axis.grid_color != undefined) {  
+        d3.selectAll('#y-axis .tick').filter( (d,i) => i != 0) 
+            .append('line')
+            .classed('grid-line', true)
+            .attr('stroke', opt.x_axis.grid_color)
+            .attr('x1', 1)
+            .attr('y1', 0.5)
+            .attr('x2', opt.chart_area.bounds.width)
+            .attr('y2', 0.5)
+    }
 
     // Chart Title
     if (opt.chart_title.visible) {
