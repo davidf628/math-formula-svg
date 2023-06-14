@@ -6,7 +6,6 @@ FORMULA CREATOR
 - Add ability to drag/drop an SVG equation file and bring the TeX commands into the editor
 
 CHART CREATOR
-- Allow for indicating the spacing of y-axis ticks: .tickValues(d3.range(min, max, step))
 - Use boolean flag to turn on/off grid, not undefined in grid_color
 - Make the interface in electron for the chart creation
 - Add ability to add axis labels and titles to histograms

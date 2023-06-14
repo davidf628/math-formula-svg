@@ -64,24 +64,32 @@
             visible: true,
             tick_format: '$,',
             label_rotation: 45,
+            grid: true,
             grid_color: '#e0e0e0',
-            manual_ticks: true,
+            manual_ticks: false,
             scale: {
                 min: 0,
-                max: 2600,
+                max: 3000,
                 step: 500
             }
         },
         y_axis: {
-            visible: false,
+            visible: true,
             tick_format: '',
-            grid_color: '#e0e0e0'
+            grid: true,
+            grid_color: '#e0e0e0',
+            manual_ticks: false,
+            scale: {
+                min: 0,
+                max: 30,
+                step: 5
+            }
         },
         scale_pad: {
             x_low: 0,
             y_low: 0,
-            x_high: 300,
-            y_high: 4,
+            x_high: 200,
+            y_high: 2,
         }
     }
 
@@ -197,22 +205,30 @@
                 .attr('text-anchor', 'start');
         }
         x_axis_height = document.getElementById('x-axis').getBBox().height;
-        opt.x_axis.grid_color = undefined;
     } else {
         x_axis_height = default_margin;
+        opt.x_axis.grid = false;
     }
 
     // Add y-axis  
     let y_axis, y_axis_width;   
     if (opt.y_axis.visible) {   
+
+        const scale = opt.y_axis.manual_ticks 
+            ? d3.axisLeft(yScale)
+                .tickFormat(d3.format(opt.y_axis.tick_format))
+                .tickValues(d3.range(opt.y_axis.scale.min, opt.y_axis.scale.max, opt.y_axis.scale.step))
+            : d3.axisLeft(yScale)
+                .tickFormat(d3.format(opt.y_axis.tick_format));
+
         y_axis = chart_area.append('g')
             .attr('id', 'y-axis')
-            .call(d3.axisLeft(yScale).tickFormat(d3.format(opt.y_axis.tick_format)));
+            .call(scale);
 
         y_axis_width = document.getElementById('y-axis').getBBox().width;
-        opt.y_axis.grid_color = undefined;
     } else {
         y_axis_width = default_margin;
+        opt.y_axis.grid = false;
     }
 
     // Calculate chart area dimensions
@@ -268,7 +284,7 @@
     }
 
     // Draw x-axis grid lines, skip the first one
-    if (opt.x_axis.grid_color != undefined) {  
+    if (opt.x_axis.grid == true) {  
         d3.selectAll('#x-axis .tick').filter( (d,i) => i != 0)
             .append('line')
             .classed('grid-line', true)
@@ -280,12 +296,20 @@
     }
 
     if (opt.y_axis.visible) {
+
+        const scale = opt.y_axis.manual_ticks 
+            ? d3.axisLeft(yScale)
+                .tickFormat(d3.format(opt.y_axis.tick_format))
+                .tickValues(d3.range(opt.y_axis.scale.min, opt.y_axis.scale.max, opt.y_axis.scale.step))
+            : d3.axisLeft(yScale)
+                .tickFormat(d3.format(opt.y_axis.tick_format));
+
         y_axis
-            .call(d3.axisLeft(yScale).tickFormat(d3.format(opt.y_axis.tick_format)));
+            .call(scale);
     }
 
     // Draw y-axis grid lines, skip the first one
-    if (opt.y_axis.grid_color != undefined) {  
+    if (opt.y_axis.grid == true) {  
         d3.selectAll('#y-axis .tick').filter( (d,i) => i != 0) 
             .append('line')
             .classed('grid-line', true)

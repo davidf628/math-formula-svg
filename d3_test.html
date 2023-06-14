@@ -26,7 +26,7 @@
         top_margin: 10,
         bottom_margin: 70,
         left_margin: 40,
-        right_margin: 1,
+        right_margin: 40,
         show_x_labels: true,
         show_y_labels: true,
         padding: 0.3,
@@ -34,8 +34,30 @@
 
     // Sample data
     const data = [
-        { index: 0, label: 'Ozempic', value: 23 },
-        { index: 1, label: 'Placebo', value: 12 },
+        { index: 0, label: 'Taylor Swift', value: 2 },
+        { index: 1, label: 'Twenty One Pilots', value: 2 },
+        { index: 2, label: 'Alan Walker', value: 1 },
+        { index: 3, label: 'Arctic Monkeys', value: 1 },
+        { index: 4, label: 'Ariana Grande', value: 1 },
+        { index: 5, label: 'Bad Bunny', value: 1 },
+        { index: 6, label: 'The Chainsmokers', value: 1 },
+        { index: 7, label: 'The Clash', value: 1 },
+        { index: 8, label: 'The Dave Matthews Band', value: 1 },
+        { index: 9, label: 'David Bowie', value: 1 },
+        { index: 10, label: 'Eminem', value: 1 },
+        { index: 11, label: 'The Fat Rat', value: 1 },
+        { index: 12, label: 'Imagine Dragons', value: 1 },
+        { index: 13, label: 'Katy Perry', value: 1 },
+        { index: 14, label: 'Lana Del Rey', value: 1 },
+        { index: 15, label: 'Lil Pump', value: 1 },
+        { index: 16, label: 'Meghan Trainor', value: 1 },
+        { index: 17, label: 'Modest Mouse', value: 1 },
+        { index: 18, label: 'Nirvana', value: 1 },
+        { index: 19, label: 'Radiohead', value: 1 },
+        { index: 20, label: 'Rhianna', value: 1 },
+        { index: 21, label: 'Sublime', value: 1 },
+        { index: 22, label: 'The White Stripes', value: 1 },
+
     ];
 
     // Set up SVG container
@@ -58,7 +80,7 @@
 
     // Create y scale
     let y = d3.scaleLinear()
-        .domain([0, d3.max(data, (d, i) => d.value)+5])
+        .domain([0, d3.max(data, (d, i) => d.value)])
         .range([height, 0]);
 
     if (opt.show_x_labels) {
@@ -70,7 +92,7 @@
         
         // Rotate titles
         let bottom_axis_text = d3.selectAll("#bottom-axis text")
-        //bottom_axis_text.attr('transform', 'rotate(45)').attr('text-anchor', 'start')
+        bottom_axis_text.attr('transform', 'rotate(45)').attr('text-anchor', 'start')
     }
 
     if (opt.show_y_labels) {
@@ -78,7 +100,7 @@
         svg.append("g")
             .attr('id', 'left-axis')
             .attr("transform", "translate(" + opt.left_margin + "," + opt.top_margin + ")")
-            .call(d3.axisLeft(y).tickFormat( d => `${d} %`));
+            .call(d3.axisLeft(y).tickValues(d3.range(0, 3, 1)).tickFormat((d,i) => `${Math.round(d)}`));
     }
 
     // Create bars
