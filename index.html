@@ -17,37 +17,47 @@
 </head>
 
 <html>
-<h1>Convert an equation to SVG</h1>
+    
+    <input type="button" value="Equation Maker" onClick="showEquationMaker()">
+    <input type="button" value="Bar Chart Maker" onClick="showBarChartMaker()">
 
-<label for="equation">Enter Equation Below:</label>
-<label for="render-engine">Rendering Engine:</label>
-<select id="render-engine">
-    <option value="AsciiMath">ASCIIMath</option>
-    <option value="TeX">TeX</option>
-    <option value="inline-TeX">inline TeX</option>
-    <option value="MathML">MathML</option>
-</select>
-<input type="button" value="Make Equation" onClick="convertEqntoSVG()"><br/><br/>
-<textarea id="equation" rows="6" cols="60" placeholder="Enter Equation in LaTex or ASCIIMath"></textarea>
+    <div id="equation-maker" display="block">
+        <h1>Convert an equation to SVG</h1>
 
-<br/><br/>
-<div id='equation-space'>Preview will display here.</div>
+        <label for="equation">Enter Equation Below:</label>
+        <label for="render-engine">Rendering Engine:</label>
+        <select id="render-engine">
+            <option value="AsciiMath">ASCIIMath</option>
+            <option value="TeX">TeX</option>
+            <option value="inline-TeX">inline TeX</option>
+            <option value="MathML">MathML</option>
+        </select>
+        <input type="button" value="Make Equation" onClick="convertEqntoSVG()"><br/><br/>
+        <textarea id="equation" rows="6" cols="60" placeholder="Enter Equation in LaTex or ASCIIMath"></textarea>
 
-<p>File name for the SVG output:</p>
-<input type="text" id="svg-file-name" size="80"><br/><br/>
-<div class="path-container">
-    <div class="path-column">Path:</div>
-    <div class="path-column" id="svg-path"></div> 
-    <div class="path-column"><input type="button" value="Choose Directory..." onClick="openDirectory()"></div>
-</div>
-<br/><br/>
-Syntax References:
-<ul>
-    <li><a href="http://asciimath.org/" target="_blank">Reference for ASCIIMath Syntax</a></li>
-    <li><a href="https://quickref.me/latex.html" target="_blank">LaTex Quick Reference</a></li>
-    <li><a href="http://www.cs.put.poznan.pl/ksiek/latexmath.html" target="_blank">LaTex Detailed Reference</a></li>
-    <li><a href="https://www.sqlpac.com/en/documents/mathjax-tex-practical-handbook-quick-reference.html" target="_blank">MathJax Reference</a></li>
-</ul>
+        <br/><br/>
+        <div id='equation-space'>Preview will display here.</div>
+
+        <p>File name for the SVG output:</p>
+        <input type="text" id="svg-file-name" size="80"><br/><br/>
+        <div class="path-container">
+            <div class="path-column">Path:</div>
+            <div class="path-column" id="svg-path"></div> 
+            <div class="path-column"><input type="button" value="Choose Directory..." onClick="openDirectory()"></div>
+        </div>
+        <br/><br/>
+        Syntax References:
+        <ul>
+            <li><a href="http://asciimath.org/" target="_blank">Reference for ASCIIMath Syntax</a></li>
+            <li><a href="https://quickref.me/latex.html" target="_blank">LaTex Quick Reference</a></li>
+            <li><a href="http://www.cs.put.poznan.pl/ksiek/latexmath.html" target="_blank">LaTex Detailed Reference</a></li>
+            <li><a href="https://www.sqlpac.com/en/documents/mathjax-tex-practical-handbook-quick-reference.html" target="_blank">MathJax Reference</a></li>
+        </ul>
+    </div>
+
+    <div id="bar-chart-maker">
+        <h1>Bar Chart Maker</h1>
+    </div>
 
 </body>
 
@@ -79,6 +89,16 @@ Syntax References:
         function openDirectory() {
             window.mjAPI.openDirectory();
         }
+
+        function showEquationMaker() {
+            document.getElementById("equation-maker").style.display = "block";
+            document.getElementById("bar-chart-maker").style.display = "none";
+        } 
+
+        function showBarChartMaker() {
+            document.getElementById("equation-maker").style.display = "none";
+            document.getElementById("bar-chart-maker").style.display = "block";
+        } 
 
     </script>
 

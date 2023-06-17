@@ -114,6 +114,8 @@
         }
     ];
 
+
+
     let default_margin = 5;
 
     // Set up margin and dimensions
@@ -133,48 +135,10 @@
         .append('g')
         .attr('id', 'chart-area');
 
-    // Set up fonts first in order to get metrics
-    let chart_title;
-    if (opt.chart_title.visible) {
-        chart_title = d3.select('svg')
-            .append('text')
-            .attr('id', 'chart-title')
-            .style('font-family', opt.chart_title.font)
-            .style('font-size', opt.chart_title.size)
-            .style('font-weight', opt.chart_title.weight)
-            .text(opt.chart_title.text);
-        opt.chart_title.text_bounds = document.getElementById('chart-title').getBBox();
-    } else {
-        opt.chart_title.text_bounds = { x: 0, y: 0, width: 0, height: 0 };
-    }
-
-    let x_axis_title;
-    if (opt.x_title.visible) {
-        x_axis_title = d3.select('svg')
-            .append('text')
-            .attr('id', 'x-axis-title')
-            .style('font-family', opt.x_title.font)
-            .style('font-size', opt.x_title.size)
-            .style('font-weight', opt.x_title.weight)
-            .text(opt.x_title.text);
-        opt.x_title.text_bounds = document.getElementById('x-axis-title').getBBox();
-    } else {
-        opt.x_title.text_bounds = { x: 0, y: 0, width: 0, height: 0 };
-    }
-
-    let y_axis_title; 
-    if (opt.y_title.visible) {
-        y_axis_title = d3.select('svg')
-            .append('text')
-            .attr('id', 'y-axis-title')
-            .style('font-family', opt.y_title.font)
-            .style('font-size', opt.y_title.size)
-            .style('font-weight', opt.y_title.weight)
-            .text(opt.y_title.text);
-        opt.y_title.text_bounds = document.getElementById('y-axis-title').getBBox();
-    } else {
-        opt.y_title.text_bounds = { x: 0, y: 0, width: 0, height: 0 }
-    }
+    // Get font metrics
+    opt.chart_title.text_bounds = getTextBounds(opt.chart_title);
+    opt.x_title.text_bounds = getTextBounds(opt.x_title);
+    opt.y_title.text_bounds = getTextBounds(opt.y_title);
 
     // Create x scale
     let xScale = d3.scaleLinear()
@@ -320,32 +284,11 @@
             .attr('y2', 0.5)
     }
 
-    // Chart Title
-    if (opt.chart_title.visible) {
-        chart_title
-            .attr('x', opt.chart_title.bounds.xmid)
-            .attr('y', opt.chart_title.bounds.ymid)
-            .attr('text-anchor', 'middle')
-            .attr('dominant-baseline', 'middle')
-            .attr('fill', opt.chart_title.color)
-    }
-
-    // X label
-    if (opt.x_title.visible) {
-        x_axis_title
-            .attr('x', opt.x_title.bounds.xmid)
-            .attr('y', opt.x_title.bounds.ymid)
-            .attr('text-anchor', 'middle')
-            .attr('dominant-baseline', 'middle');
-    }
-
-    // Y label
-    if (opt.y_title.visible) {
-        y_axis_title
-            .attr('text-anchor', 'middle')
-            .attr('dominant-baseline', 'middle')
-            .attr('transform',`translate(${opt.y_title.bounds.xmid}, ${opt.y_title.bounds.ymid})rotate(-90)`);
-    }
+    // Add titles to the chart
+    addSVGText(opt.chart_title, 'chart-title');
+    addSVGText(opt.x_title, 'x-axis-title');
+    addSVGText(opt.y_title, 'y-axis-title')
+        .attr('transform',`translate(${opt.y_title.bounds.xmid}, ${opt.y_title.bounds.ymid})rotate(-90)`);
 
     // Add plots
     for (dataset of data) {
@@ -375,6 +318,44 @@
             .style('stroke-width', '2');
     }
       
+    function getTextBounds(text) {
+
+        let bounds = { x: 0, y: 0, width: 0, height: 0 }
+        
+        if (text.visible) {
+            let tmp = d3.select('svg')
+                .append('text')
+                .attr('id', 'temp-text')
+                .style('font-family', text.font)
+                .style('font-size', text.size)
+                .style('font-weight', text.weight)
+                .text(text.text);
+            bounds = document.getElementById('temp-text').getBBox();
+            document.getElementById('temp-text').remove();
+        } 
+    
+        return bounds;
+    }
+
+    function addSVGText(text, elementId) {
+
+        if (text.visible) {
+            let object = d3.select('svg')
+                .append('text')
+                .attr('id', elementId)
+                .style('font-family', text.font)
+                .style('font-size', text.size)
+                .style('font-weight', text.weight)
+                .attr('fill', text.color)
+                .attr('transform', `translate(${text.bounds.xmid},${text.bounds.ymid})`)
+                .attr('text-anchor', 'middle')
+                .attr('dominant-baseline', 'middle')
+                .text(text.text);
+            return object;
+        }
+        return undefined;
+    }
+
 	function svg_rectangle(svg, x, y, width, height, opt) {
 	
 		if (opt == undefined) {
