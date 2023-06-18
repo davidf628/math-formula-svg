@@ -24,6 +24,7 @@
         height: 400,
         background_color: 'white',
         border_color: 'white',
+        default_margin: 5,
         chart_area: {
             bounds: {},
         },
@@ -114,27 +115,19 @@
         }
     ];
 
-
-
-    let default_margin = 5;
-
-    // Set up margin and dimensions
+    // Set up drawing area
     let svg = d3.select('svg')
         .attr('width', opt.width)
         .attr('height', opt.height);
-        
-    let background = svg.append('rect')
-        .attr('x', 0)
-        .attr('y', 0)
-        .attr('width', opt.width)
-        .attr('height', opt.height)
-        .attr('fill', opt.background_color)
-        .attr('stroke', opt.border_color);
+    
+    // Set background color
+    setBackground(svg, opt.width, opt.height, opt.background_color, opt.border_color);
 
+    // Set up the chart area - the part inside the axes
     let chart_area = svg
         .append('g')
         .attr('id', 'chart-area');
-
+ 
     // Get font metrics
     opt.chart_title.text_bounds = getTextBounds(opt.chart_title);
     opt.x_title.text_bounds = getTextBounds(opt.x_title);
@@ -148,85 +141,17 @@
     let yScale = d3.scaleLinear()
         .domain( [opt.scale_pad.y_low, dataMax(data, 'y') + opt.scale_pad.y_high] );
 
-    // Add x-axis
-    let x_axis, x_axis_height;
-    if (opt.x_axis.visible) {
-
-        const scale = opt.x_axis.manual_ticks 
-            ? d3.axisBottom(xScale)
-                .tickFormat(d3.format(opt.x_axis.tick_format))
-                .tickValues(d3.range(opt.x_axis.scale.min, opt.x_axis.scale.max, opt.x_axis.scale.step))
-            : d3.axisBottom(xScale)
-                .tickFormat(d3.format(opt.x_axis.tick_format));
-
-        x_axis = chart_area.append('g')
-            .attr('id', 'x-axis')
-            .call(scale);
-        
-        if (opt.x_axis.label_rotation != 0) {
-            d3.selectAll('#x-axis text')
-                .attr('transform', `rotate(${opt.x_axis.label_rotation})`)
-                .attr('text-anchor', 'start');
-        }
-        x_axis_height = document.getElementById('x-axis').getBBox().height;
-    } else {
-        x_axis_height = default_margin;
-        opt.x_axis.grid = false;
-    }
-
-    // Add y-axis  
-    let y_axis, y_axis_width;   
-    if (opt.y_axis.visible) {   
-
-        const scale = opt.y_axis.manual_ticks 
-            ? d3.axisLeft(yScale)
-                .tickFormat(d3.format(opt.y_axis.tick_format))
-                .tickValues(d3.range(opt.y_axis.scale.min, opt.y_axis.scale.max, opt.y_axis.scale.step))
-            : d3.axisLeft(yScale)
-                .tickFormat(d3.format(opt.y_axis.tick_format));
-
-        y_axis = chart_area.append('g')
-            .attr('id', 'y-axis')
-            .call(scale);
-
-        y_axis_width = document.getElementById('y-axis').getBBox().width;
-    } else {
-        y_axis_width = default_margin;
-        opt.y_axis.grid = false;
-    }
+    // These add the x and y axes to the output, in order to figure out their 
+    // dimensions we can't completely draw the axis until we know the 
+    // placement of all the chart items
+    opt = setup_xaxis(xScale, chart_area, opt);
+    opt = setup_yaxis(yScale, chart_area, opt);
 
     // Calculate chart area dimensions
-    opt.chart_area.top_margin = opt.chart_title.visible ? opt.chart_title.pad * 2 + opt.chart_title.text_bounds.height : default_margin;
-    opt.chart_area.bottom_margin = opt.x_title.visible ? opt.x_title.pad * 2 + opt.x_title.text_bounds.height + x_axis_height : x_axis_height + default_margin;
-    opt.chart_area.right_margin = default_margin;
-    opt.chart_area.left_margin = opt.y_title.visible ? opt.y_title.pad * 2 + opt.y_title.text_bounds.height + y_axis_width : y_axis_width + default_margin;
-
-    opt.chart_area.bounds.x = opt.chart_area.left_margin;
-    opt.chart_area.bounds.y = opt.chart_area.top_margin;
-    opt.chart_area.bounds.width = opt.width - opt.chart_area.left_margin - opt.chart_area.right_margin;
-    opt.chart_area.bounds.height = opt.height - opt.chart_area.top_margin - opt.chart_area.bottom_margin;
-    calculateBounds(opt.chart_area.bounds);
-
-    opt.chart_title.bounds.x = 0;
-    opt.chart_title.bounds.y = 0;
-    opt.chart_title.bounds.width = opt.chart_area.bounds.right;
-    opt.chart_title.bounds.height = opt.chart_area.bounds.top;
-    calculateBounds(opt.chart_title.bounds);
-
-    opt.x_title.bounds.x = opt.chart_area.bounds.left;
-    opt.x_title.bounds.y = opt.chart_area.bounds.bottom + x_axis_height;
-    opt.x_title.bounds.width = opt.chart_area.bounds.width;
-    opt.x_title.bounds.height = opt.chart_area.bottom_margin - x_axis_height;
-    calculateBounds(opt.x_title.bounds);
-
-    opt.y_title.bounds.x = 0;
-    opt.y_title.bounds.y = opt.chart_area.bounds.top;
-    opt.y_title.bounds.width = opt.chart_area.left_margin - y_axis_width;
-    opt.y_title.bounds.height = opt.chart_area.bounds.height;    
-    calculateBounds(opt.y_title.bounds);
+    opt = set_chart_dimensions(opt);
 
     chart_area
-        .attr("transform", `translate(${opt.chart_area.bounds.left},${opt.chart_area.bounds.top})`);
+        .attr('transform', `translate(${opt.chart_area.bounds.left},${opt.chart_area.bounds.top})`);
     
     xScale
         .range([0, opt.chart_area.bounds.width]);
@@ -234,55 +159,8 @@
     yScale
         .range([opt.chart_area.bounds.height, 0]);
 
-    // Redraw the axes, now that we know the dimensions
-    if (opt.x_axis.visible) {
-        const scale = opt.x_axis.manual_ticks 
-            ? d3.axisBottom(xScale)
-                .tickFormat(d3.format(opt.x_axis.tick_format))
-                .tickValues(d3.range(opt.x_axis.scale.min, opt.x_axis.scale.max, opt.x_axis.scale.step))
-            : d3.axisBottom(xScale)
-                .tickFormat(d3.format(opt.x_axis.tick_format));
-        x_axis
-            .attr('transform', `translate(0,${opt.chart_area.bounds.height})`)
-            .call(scale);
-    }
-
-    // Draw x-axis grid lines, skip the first one
-    if (opt.x_axis.grid == true) {  
-        d3.selectAll('#x-axis .tick').filter( (d,i) => i != 0)
-            .append('line')
-            .classed('grid-line', true)
-            .attr('stroke', opt.x_axis.grid_color)
-            .attr('x1', 0.5)
-            .attr('y1', 0)
-            .attr('x2', 0.5)
-            .attr('y2', -opt.chart_area.bounds.height)
-    }
-
-    if (opt.y_axis.visible) {
-
-        const scale = opt.y_axis.manual_ticks 
-            ? d3.axisLeft(yScale)
-                .tickFormat(d3.format(opt.y_axis.tick_format))
-                .tickValues(d3.range(opt.y_axis.scale.min, opt.y_axis.scale.max, opt.y_axis.scale.step))
-            : d3.axisLeft(yScale)
-                .tickFormat(d3.format(opt.y_axis.tick_format));
-
-        y_axis
-            .call(scale);
-    }
-
-    // Draw y-axis grid lines, skip the first one
-    if (opt.y_axis.grid == true) {  
-        d3.selectAll('#y-axis .tick').filter( (d,i) => i != 0) 
-            .append('line')
-            .classed('grid-line', true)
-            .attr('stroke', opt.x_axis.grid_color)
-            .attr('x1', 1)
-            .attr('y1', 0.5)
-            .attr('x2', opt.chart_area.bounds.width)
-            .attr('y2', 0.5)
-    }
+    draw_xaxis(xScale, opt);
+    draw_yaxis(yScale, opt);
 
     // Add titles to the chart
     addSVGText(opt.chart_title, 'chart-title');
@@ -292,7 +170,8 @@
 
     // Add plots
     for (dataset of data) {
-        svg.append('g')
+        chart_area
+            .append('g')
             .selectAll('dot')
             .data(dataset.points)
             .enter()
@@ -300,7 +179,6 @@
             .attr('cx', (d,i) => xScale(d[0]) )
             .attr('cy', (d,i) => yScale(d[1]) )
             .attr('r', 3)
-            .attr('transform', `translate(${opt.chart_area.bounds.left},${opt.chart_area.bounds.top})`)
             .style('fill', dataset.color);
         
         // Add Lines     
@@ -308,10 +186,10 @@
             .x( (d,i) => xScale(d[0]) ) 
             .y( (d,i) => yScale(d[1]) ) 
                 
-        svg.append('path')
+        chart_area
+            .append('path')
             .datum(dataset.points) 
             .attr('class', 'line') 
-            .attr('transform', `translate(${opt.chart_area.bounds.left},${opt.chart_area.bounds.top})`)
             .attr('d', line)
             .style('fill', 'none')
             .style('stroke', dataset.color)
@@ -354,6 +232,155 @@
             return object;
         }
         return undefined;
+    }
+
+    function setBackground(svg, width, height, color, border) {
+        svg.append('rect')
+            .attr('x', 0)
+            .attr('y', 0)
+            .attr('width', width)
+            .attr('height', height)
+            .attr('fill', color)
+            .attr('stroke', border);
+    }
+
+    function setup_xaxis(xScale, chart_area, opt) {
+
+        if (opt.x_axis.visible) {
+    
+            const scale = opt.x_axis.manual_ticks 
+                ? d3.axisBottom(xScale)
+                    .tickFormat(d3.format(opt.x_axis.tick_format))
+                    .tickValues(d3.range(opt.x_axis.scale.min, opt.x_axis.scale.max, opt.x_axis.scale.step))
+                : d3.axisBottom(xScale)
+                    .tickFormat(d3.format(opt.x_axis.tick_format));
+    
+            chart_area.append('g')
+                .attr('id', 'x-axis')
+                .call(scale);
+            
+            if (opt.x_axis.label_rotation != 0) {
+                d3.selectAll('#x-axis text')
+                    .attr('transform', `rotate(${opt.x_axis.label_rotation})`)
+                    .attr('text-anchor', 'start');
+            }
+            opt.x_axis.bounds = document.getElementById('x-axis').getBBox();
+        } else {
+            opt.x_axis.bounds = { x: 0, y: 0, width: 0, height: opt.default_margin }
+            opt.x_axis.grid = false;
+        }
+        return opt;
+    }
+
+    function draw_xaxis(xScale, opt) {
+        // Redraw the axes, now that we know the correct dimensions
+        if (opt.x_axis.visible) {
+            const scale = opt.x_axis.manual_ticks 
+                ? d3.axisBottom(xScale)
+                    .tickFormat(d3.format(opt.x_axis.tick_format))
+                    .tickValues(d3.range(opt.x_axis.scale.min, opt.x_axis.scale.max, opt.x_axis.scale.step))
+                : d3.axisBottom(xScale)
+                    .tickFormat(d3.format(opt.x_axis.tick_format));
+            d3.select('#x-axis')
+                .attr('transform', `translate(0,${opt.chart_area.bounds.height})`)
+                .call(scale);
+        }
+
+        // Draw x-axis grid lines, skip the first one
+        if (opt.x_axis.grid) {  
+            d3.selectAll('#x-axis .tick').filter( (d,i) => i != 0)
+                .append('line')
+                .classed('grid-line', true)
+                .attr('stroke', opt.x_axis.grid_color)
+                .attr('x1', 0.5)
+                .attr('y1', 0)
+                .attr('x2', 0.5)
+                .attr('y2', -opt.chart_area.bounds.height)
+        }
+    }
+
+    function setup_yaxis(yScale, chart_area, opt) {
+ 
+        if (opt.y_axis.visible) {   
+
+            const scale = opt.y_axis.manual_ticks 
+                ? d3.axisLeft(yScale)
+                    .tickFormat(d3.format(opt.y_axis.tick_format))
+                    .tickValues(d3.range(opt.y_axis.scale.min, opt.y_axis.scale.max, opt.y_axis.scale.step))
+                : d3.axisLeft(yScale)
+                    .tickFormat(d3.format(opt.y_axis.tick_format));
+
+            chart_area.append('g')
+                .attr('id', 'y-axis')
+                .call(scale);
+
+            opt.y_axis.bounds = document.getElementById('y-axis').getBBox();
+        } else {
+            opt.y_axis.bounds = { x: 0, y: 0, width: opt.default_margin, height: 0 };
+            opt.y_axis.grid = false;
+        }
+        return opt;
+    }
+
+    function draw_yaxis(yScale, opt) {
+        if (opt.y_axis.visible) {
+
+            const scale = opt.y_axis.manual_ticks 
+                ? d3.axisLeft(yScale)
+                    .tickFormat(d3.format(opt.y_axis.tick_format))
+                    .tickValues(d3.range(opt.y_axis.scale.min, opt.y_axis.scale.max, opt.y_axis.scale.step))
+                : d3.axisLeft(yScale)
+                    .tickFormat(d3.format(opt.y_axis.tick_format));
+    
+            d3.select('#y-axis')
+                .call(scale);
+        }
+    
+        // Draw y-axis grid lines, skip the first one
+        if (opt.y_axis.grid) {  
+            d3.selectAll('#y-axis .tick').filter( (d,i) => i != 0) 
+                .append('line')
+                .classed('grid-line', true)
+                .attr('stroke', opt.x_axis.grid_color)
+                .attr('x1', 1)
+                .attr('y1', 0.5)
+                .attr('x2', opt.chart_area.bounds.width)
+                .attr('y2', 0.5)
+        }
+    }
+
+    function set_chart_dimensions(opt) {
+
+        opt.chart_area.top_margin = opt.chart_title.visible ? opt.chart_title.pad * 2 + opt.chart_title.text_bounds.height : opt.default_margin;
+        opt.chart_area.bottom_margin = opt.x_title.visible ? opt.x_title.pad * 2 + opt.x_title.text_bounds.height + opt.x_axis.bounds.height : opt.x_axis.bounds.height + opt.default_margin;
+        opt.chart_area.right_margin = opt.default_margin;
+        opt.chart_area.left_margin = opt.y_title.visible ? opt.y_title.pad * 2 + opt.y_title.text_bounds.height + opt.y_axis.bounds.width : opt.y_axis.bounds.width + opt.default_margin;
+    
+        opt.chart_area.bounds.x = opt.chart_area.left_margin;
+        opt.chart_area.bounds.y = opt.chart_area.top_margin;
+        opt.chart_area.bounds.width = opt.width - opt.chart_area.left_margin - opt.chart_area.right_margin;
+        opt.chart_area.bounds.height = opt.height - opt.chart_area.top_margin - opt.chart_area.bottom_margin;
+        opt.chart_area.bounds = calculateBounds(opt.chart_area.bounds);
+    
+        opt.chart_title.bounds.x = 0;
+        opt.chart_title.bounds.y = 0;
+        opt.chart_title.bounds.width = opt.chart_area.bounds.right;
+        opt.chart_title.bounds.height = opt.chart_area.bounds.top;
+        opt.chart_title.bounds = calculateBounds(opt.chart_title.bounds);
+    
+        opt.x_title.bounds.x = opt.chart_area.bounds.left;
+        opt.x_title.bounds.y = opt.chart_area.bounds.bottom + opt.x_axis.bounds.height;
+        opt.x_title.bounds.width = opt.chart_area.bounds.width;
+        opt.x_title.bounds.height = opt.chart_area.bottom_margin - opt.x_axis.bounds.height;
+        opt.x_title.bounds = calculateBounds(opt.x_title.bounds);
+    
+        opt.y_title.bounds.x = 0;
+        opt.y_title.bounds.y = opt.chart_area.bounds.top;
+        opt.y_title.bounds.width = opt.chart_area.left_margin - opt.y_axis.bounds.width;
+        opt.y_title.bounds.height = opt.chart_area.bounds.height;    
+        opt.y_title.bounds = calculateBounds(opt.y_title.bounds);
+
+        return opt;
     }
 
 	function svg_rectangle(svg, x, y, width, height, opt) {
