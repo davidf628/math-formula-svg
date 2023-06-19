@@ -4,7 +4,7 @@
 
 <head>
 
-    <title>Line Chart Creator</title>
+    <title>Histogram Creator</title>
     <meta charset="utf-8">
     <meta http-equiv="Content-Security-Policy" >
     <link rel="stylesheet" href="./style.css">
@@ -18,19 +18,20 @@
 </body>
 
 <script>
-
+    
     let opt = {
         width: 500,
         height: 400,
         background_color: 'white',
         border_color: 'white',
         default_margin: 5,
+        padding: 0.5,
         chart_area: {
             bounds: {},
         },
         chart_title: {
             visible: true,
-            text: 'Weight Loss over Time',
+            text: 'Results of Drug Effectiveness',
             font: 'Helvetica',
             size: '20px',
             weight: 'bold',
@@ -40,8 +41,8 @@
             bounds: {}
         },
         x_title: {
-            visible: true,
-            text: 'Time (Months)',
+            visible: false,
+            text: 'Monthly Rent ($)',
             font: 'Helvetica',
             size: '12px',
             weight: 'normal',
@@ -52,7 +53,7 @@
         },
         y_title: {
             visible: true,
-            text: 'Weight (lbs)',
+            text: 'Effectiveness',
             font: 'Helvetica',
             size: '12px',
             weight: 'normal',
@@ -63,46 +64,30 @@
         },
         x_axis: {
             visible: true,
-            tick_format: '',
-            label_rotation: 0,
-            grid: false,
-            grid_color: '#e0e0e0',
-            manual_ticks: true,
-            scale: {
-                min: 0,
-                max: 5.5,
-                step: 1
-            }
+            label_rotation: 0
         },
         y_axis: {
             visible: true,
-            tick_format: '',
-            grid: false,
+            tick_format: '.0%',
+            grid: true,
             grid_color: '#e0e0e0',
             manual_ticks: false,
             scale: {
-                min: 187,
-                max: 203,
-                step: 2
+                min: 0.2,
+                max: 0.3,
+                step: 0.03
             }
         },
         scale_pad: {
-            x_low: 0,
             y_low: 0,
-            x_high: 0,
-            y_high: 20,
+            y_high: 0.01,
         }
     }
 
-    const data = [ 
-        { 
-            title: 'list 1',
-            color: '#0000CC',
-            points: [ 
-                [0, 200], [1, 195], [2, 192], [3, 193], [4, 190], [5, 188] 
-            ]
-        },
-
+    // Sample data
+    const data = [
+        { index: 0, label: 'Ozistra', value: 0.29 },
+        { index: 1, label: 'Placebo', value: 0.21 }
     ];
 
     // Set up drawing area
@@ -112,25 +97,26 @@
     
     // Set background color
     setBackground(svg, opt.width, opt.height, opt.background_color, opt.border_color);
-
+    
     // Set up the chart area - the part inside the axes
     let chart_area = svg
         .append('g')
         .attr('id', 'chart-area');
- 
+     
     // Get font metrics
     opt.chart_title.text_bounds = getTextBounds(opt.chart_title);
     opt.x_title.text_bounds = getTextBounds(opt.x_title);
     opt.y_title.text_bounds = getTextBounds(opt.y_title);
-
+    
     // Create x scale
-    let xScale = d3.scaleLinear()
-        .domain( [opt.scale_pad.x_low, dataMax(data, 'x') + opt.scale_pad.x_high] );
+    let xScale = d3.scaleBand()
+        .domain( data.map((d, i) => getLabel(d)) )
+        .padding(opt.padding);
 
     // Create y scale
     let yScale = d3.scaleLinear()
         .domain( [opt.scale_pad.y_low, dataMax(data, 'y') + opt.scale_pad.y_high] );
-
+    
     // These add the x and y axes to the output, in order to figure out their 
     // dimensions we can't completely draw the axis until we know the 
     // placement of all the chart items
@@ -139,7 +125,7 @@
 
     // Calculate chart area dimensions
     opt = set_chart_dimensions(opt);
-
+    
     chart_area
         .attr('transform', `translate(${opt.chart_area.bounds.left},${opt.chart_area.bounds.top})`);
     
@@ -158,34 +144,18 @@
     addSVGText(opt.y_title, 'y-axis-title')
         .attr('transform',`translate(${opt.y_title.bounds.xmid}, ${opt.y_title.bounds.ymid})rotate(-90)`);
 
-    // Add plots
-    for (dataset of data) {
-        chart_area
-            .append('g')
-            .selectAll('dot')
-            .data(dataset.points)
-            .enter()
-            .append('circle')
-            .attr('cx', (d,i) => xScale(d[0]) )
-            .attr('cy', (d,i) => yScale(d[1]) )
-            .attr('r', 3)
-            .style('fill', dataset.color);
-        
-        // Add Lines     
-        let line = d3.line()
-            .x( (d,i) => xScale(d[0]) ) 
-            .y( (d,i) => yScale(d[1]) ) 
-                
-        chart_area
-            .append('path')
-            .datum(dataset.points) 
-            .attr('class', 'line') 
-            .attr('d', line)
-            .style('fill', 'none')
-            .style('stroke', dataset.color)
-            .style('stroke-width', '2');
-    }
-      
+    // Create bars
+    chart_area.selectAll("rect")
+        .data(data)
+        .enter()
+        .append("rect")
+        .attr("x", (d, i) => { return xScale(getLabel(d)); })
+        .attr("y", (d, i) => { return yScale(d.value); })
+        .attr("width", (d) => { return xScale.bandwidth(); })
+        .attr("height", (d) => { return opt.chart_area.bounds.height - yScale(d.value); })
+        .attr("fill", "steelblue")
+        .attr("stroke", "black");
+          
     function getTextBounds(text) {
 
         let bounds = { x: 0, y: 0, width: 0, height: 0 }
@@ -204,7 +174,7 @@
     
         return bounds;
     }
-
+    
     function addSVGText(text, elementId) {
 
         if (text.visible) {
@@ -233,17 +203,12 @@
             .attr('fill', color)
             .attr('stroke', border);
     }
-
+    
     function setup_xaxis(xScale, chart_area, opt) {
 
         if (opt.x_axis.visible) {
     
-            const scale = opt.x_axis.manual_ticks 
-                ? d3.axisBottom(xScale)
-                    .tickFormat(d3.format(opt.x_axis.tick_format))
-                    .tickValues(d3.range(opt.x_axis.scale.min, opt.x_axis.scale.max, opt.x_axis.scale.step))
-                : d3.axisBottom(xScale)
-                    .tickFormat(d3.format(opt.x_axis.tick_format));
+            const scale = d3.axisBottom(xScale);
     
             chart_area.append('g')
                 .attr('id', 'x-axis')
@@ -265,32 +230,16 @@
     function draw_xaxis(xScale, opt) {
         // Redraw the axes, now that we know the correct dimensions
         if (opt.x_axis.visible) {
-            const scale = opt.x_axis.manual_ticks 
-                ? d3.axisBottom(xScale)
-                    .tickFormat(d3.format(opt.x_axis.tick_format))
-                    .tickValues(d3.range(opt.x_axis.scale.min, opt.x_axis.scale.max, opt.x_axis.scale.step))
-                : d3.axisBottom(xScale)
-                    .tickFormat(d3.format(opt.x_axis.tick_format));
+            const scale = d3.axisBottom(xScale);
             d3.select('#x-axis')
                 .attr('transform', `translate(0,${opt.chart_area.bounds.height})`)
                 .call(scale);
         }
 
-        // Draw x-axis grid lines, skip the first one
-        if (opt.x_axis.grid) {  
-            d3.selectAll('#x-axis .tick').filter( (d,i) => i != 0)
-                .append('line')
-                .classed('grid-line', true)
-                .attr('stroke', opt.x_axis.grid_color)
-                .attr('x1', 0.5)
-                .attr('y1', 0)
-                .attr('x2', 0.5)
-                .attr('y2', -opt.chart_area.bounds.height)
-        }
     }
-
+    
     function setup_yaxis(yScale, chart_area, opt) {
- 
+    
         if (opt.y_axis.visible) {   
 
             const scale = opt.y_axis.manual_ticks 
@@ -311,7 +260,7 @@
         }
         return opt;
     }
-
+    
     function draw_yaxis(yScale, opt) {
         if (opt.y_axis.visible) {
 
@@ -338,7 +287,7 @@
                 .attr('y2', 0.5)
         }
     }
-
+    
     function set_chart_dimensions(opt) {
 
         opt.chart_area.top_margin = opt.chart_title.visible ? opt.chart_title.pad * 2 + opt.chart_title.text_bounds.height : opt.default_margin;
@@ -372,57 +321,7 @@
 
         return opt;
     }
-
-	function svg_rectangle(svg, x, y, width, height, opt) {
-	
-		if (opt == undefined) {
-			opt = {}
-		}
-
-		fill = opt.fill ? opt.fill : 'black';
-		fill_opacity = opt.fill_opacity ? opt.fill_opacity : 0.1;
-		stroke = opt.stroke ? opt.stroke : 'black';
-		stroke_width = opt.stroke_width ? opt.stroke_width : 1;
-		
-		svg.append('rect')
-			.attr('x', x)
-			.attr('y', y)
-			.attr('width', width)
-			.attr('height', height)
-			.attr('fill', fill)
-			.attr('fill-opacity', fill_opacity)
-			.attr('stroke', stroke)
-			
-		return svg;
-
-	}
-	
-    function svg_rectangle_bounds(svg, bounds, opt) {
-        svg_rectangle(svg, bounds.x, bounds.y, bounds.width, bounds.height, opt);
-    }
-
-	function svg_line (svg, x1, y1, x2, y2, opt) {
-		  
-		if (opt == undefined) {
-			opt = {}
-		}
-
-		stroke = opt.stroke ? opt.stroke : 'black';
-		stroke_width = opt.stroke_width ? opt.stroke_width : 1;
-		
-	    svg.append('line')
-			.attr('x1', x1)  
-			.attr('y1', y1)
-			.attr('x2', x2)
-			.attr('y2', y2)
-			.style('stroke-width', stroke_width)
-			.style('stroke', stroke)
-			.style('fill', 'none');
-
-		return svg;
-	
-	}
-	
+    
     function calculateBounds(bounds) {
         bounds.left = bounds.x;
         bounds.right = bounds.left + bounds.width; 
@@ -432,39 +331,24 @@
         bounds.ymid = bounds.top + bounds.height / 2;
         return bounds;
     }
-	
-    function dataMax(data, variable) {
+        
+    function getLabel(data) {
+        return opt.x_axis.visible ? data.label : data.index;
+    }
+    
+    function dataMax(data) {
 
         let max = Number.NEGATIVE_INFINITY;
-        let dim = variable == 'x' ? 0 : variable == 'y' ? 1 : -1;
 
-        for(set of data) {
-            for(coord of set.points) {
-                if(coord[dim] > max) {
-                    max = coord[dim]
+            for(item of data) {
+                if(item.value > max) {
+                    max = item.value;
                 }
             }
-        }
 
         return max;
         
     }
 
-    function dataMin(data, variable) {
-
-        let min = Number.POSITIVE_INFINITY;
-        let dim = variable == 'x' ? 0 : variable == 'y' ? 1 : -1;
-        
-        for(set of data) {
-            for(coord of set.points) {
-                if(coord[dim] < min) {
-                    min = coord[dim]
-                }
-            }
-        }
-        return min;
-    }
-		  
 </script>
-
 </html>

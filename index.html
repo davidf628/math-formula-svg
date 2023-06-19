@@ -9,6 +9,8 @@
     <meta http-equiv="Content-Security-Policy" >
 
     <script src="d3.js"></script>
+    <script src="barchart.js"></script>
+    <script src="d3misc.js"></script>
 
     <!-- -->
     <title>Formula Creator</title>
@@ -57,6 +59,60 @@
 
     <div id="bar-chart-maker">
         <h1>Bar Chart Maker</h1>
+        <label for="barchart-data-filename">Choose Data File:</label>
+        <input type="text" id="barchart-data-filename" size="80">
+        <input type="button" id="barchart-datafile-button" value="Choose File..." onClick="openCSVDataFile()">
+        <div id="barchart-svg">
+            <svg id="barchart-preview">
+                <text x="0" y="25">Preview will display here.</text>
+            </svg>
+        </div>
+        <input type="button" id="create-barchart" onClick="makeBarChart()">
+        <fieldset>
+            <legend>Chart Title</legend>
+            <div>
+                <input type="checkbox" id="barchart-charttitle-visible">
+                <label for="barchart-charttitle-visible">Visible</label>
+            </div>
+            <div>
+                <label for="barchart-charttitle-text">Enter Chart Title: </label>
+                <input type="text" id="barchart-charttitle-text">
+            </div>
+            <div>
+                <label for="barchart-charttitle-font">Font:</label>
+                <select id="barchart-charttitle-font">
+                  <option value="Helvetica">Helvetica</option>
+                  <option value="Arial">Arial</option>
+                  <option value="Verdana">Verdana</option>
+                  <option value="Tahoma">Tahoma</option>
+                  <option value="Trebuchet MS">Trebuchet MS</option>
+                  <option value="Times New Roman">Times New Roman</option>
+                  <option value="Georgia">Georgia</option>
+                  <option value="Garamond">Garamond</option>
+                  <option value="Courier New">Courier New</option>
+                  <option value="Brush Script">Brush Script</option>
+                </select> 
+            </div>
+            <div>
+                <label for="barchart-charttitle-size">Font Size: </label>
+                <input type="number" id="barchart-charttitle-size" min="6", max="72">
+            </div>
+            <div>
+                <label for="barchart-charttitle-weight">Font Weight: </label>
+                <select id="barchart-charttitle-weight">
+                    <option value="normal">Normal</option>
+                    <option value="bold">Bold</option>
+                </select>
+            </div>
+            <div>
+                <label for="barchart-charttitle-color">Font Color:</label>
+                <input type="color" id="barchart-charttitle-color">
+            </div>
+            <div>
+                <label for="barchart-charttitle-pad">Padding: </label>
+                <input type="number" id="barchart-charttitle-pad" min="0" max="100">
+            </div>
+        </fieldset>
     </div>
 
 </body>
@@ -99,6 +155,114 @@
             document.getElementById("equation-maker").style.display = "none";
             document.getElementById("bar-chart-maker").style.display = "block";
         } 
+
+        function openCSVDataFile() {
+
+        }
+
+        function makeBarChart() {
+            let barchartopt = {
+                width: 500,
+                height: 400,
+                background_color: '#AACCAA',
+                border_color: 'black',
+                default_margin: 5,
+                padding: 0,
+                chart_area: {
+                    bounds: {},
+                },
+                chart_title: {
+                    visible: true,
+                    text: 'Cumulative Frequency for Monthly Rent',
+                    font: 'Helvetica',
+                    size: '20px',
+                    weight: 'bold',
+                    color: 'black',
+                    pad: 10,
+                    text_bounds: {},
+                    bounds: {}
+                },
+                x_title: {
+                    visible: true,
+                    text: 'Monthly Rent ($)',
+                    font: 'Helvetica',
+                    size: '12px',
+                    weight: 'normal',
+                    color: 'black',
+                    pad: 5,
+                    text_bounds: {},
+                    bounds: {}
+                },
+                y_title: {
+                    visible: true,
+                    text: 'Cumulative Frequency',
+                    font: 'Helvetica',
+                    size: '12px',
+                    weight: 'normal',
+                    color: 'black',
+                    pad: 5,
+                    text_bounds: {},
+                    bounds: {}
+                },
+                x_axis: {
+                    visible: true,
+                    tick_format: '$,',
+                    label_rotation: 45,
+                    grid: true,
+                    grid_color: '#e0e0e0',
+                    manual_ticks: false,
+                    scale: {
+                        min: 0,
+                        max: 3000,
+                        step: 500
+                    }
+                },
+                y_axis: {
+                    visible: true,
+                    tick_format: '',
+                    grid: true,
+                    grid_color: '#e0e0e0',
+                    manual_ticks: false,
+                    scale: {
+                        min: 0,
+                        max: 30,
+                        step: 5
+                    }
+                },
+                scale_pad: {
+                    x_low: 0,
+                    y_low: 0,
+                    x_high: 200,
+                    y_high: 2,
+                }
+            }
+            const barchartdata = [
+                { index: 0, label: 'Taylor Swift', value: 2 },
+                { index: 1, label: 'Twenty One Pilots', value: 2 },
+                { index: 2, label: 'Alan Walker', value: 1 },
+                { index: 3, label: 'Arctic Monkeys', value: 1 },
+                { index: 4, label: 'Ariana Grande', value: 1 },
+                { index: 5, label: 'Bad Bunny', value: 1 },
+                { index: 6, label: 'The Chainsmokers', value: 1 },
+                { index: 7, label: 'The Clash', value: 1 },
+                { index: 8, label: 'The Dave Matthews Band', value: 1 },
+                { index: 9, label: 'David Bowie', value: 1 },
+                { index: 10, label: 'Eminem', value: 1 },
+                { index: 11, label: 'The Fat Rat', value: 1 },
+                { index: 12, label: 'Imagine Dragons', value: 1 },
+                { index: 13, label: 'Katy Perry', value: 1 },
+                { index: 14, label: 'Lana Del Rey', value: 1 },
+                { index: 15, label: 'Lil Pump', value: 1 },
+                { index: 16, label: 'Meghan Trainor', value: 1 },
+                { index: 17, label: 'Modest Mouse', value: 1 },
+                { index: 18, label: 'Nirvana', value: 1 },
+                { index: 19, label: 'Radiohead', value: 1 },
+                { index: 20, label: 'Rhianna', value: 1 },
+                { index: 21, label: 'Sublime', value: 1 },
+                { index: 22, label: 'The White Stripes', value: 1 },
+            ];
+            createBarChart(barchartdata, barchartopt);
+        }
 
     </script>
 
