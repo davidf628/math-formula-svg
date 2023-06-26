@@ -1,3 +1,4 @@
+
 // Draws a bar chart using d3 based on the provided data and options
 function createBarChart(data, opt) {
     // Erase the current drawing area
@@ -10,64 +11,121 @@ function createBarChart(data, opt) {
 
     // Set background color
     setBackground(svg, opt.width, opt.height, opt.background_color, opt.border_color);
-}
-/*
-// Set up SVG container
-let svg = d3.select("body svg")
-    .attr("width", opt.width)
-    .attr("height", opt.height);
 
-opt.bottom_margin = opt.show_x_labels ? opt.bottom_margin : 1;
-opt.left_margin = opt.show_y_labels ? opt.left_margin : 1;
+    // Set up the chart area - the part inside the axes
+    let chart_area = svg
+        .append('g')
+        .attr('id', 'chart-area');
 
-// Set up margin and dimensions
-const width = svg.attr("width") - opt.left_margin - opt.right_margin;
-const height = svg.attr("height") - opt.top_margin - opt.bottom_margin;
+    // Get font metrics
+    opt.chart_title.text_bounds = getTextBounds(opt.chart_title);
+    opt.x_title.text_bounds = getTextBounds(opt.x_title);
+    opt.y_title.text_bounds = getTextBounds(opt.y_title);
 
-// Create x scale
-let x = d3.scaleBand()
-    .domain( data.map((d, i) => getLabel(d)) )
-    .range([0, width])
-    .padding(opt.padding);
+    // Create x scale
+    let xScale = d3.scaleBand()
+        .domain( data.map( (d, i) => opt.x_axis.visible ? d.label : i ) )
+        .padding(opt.bar_padding);
 
-// Create y scale
-let y = d3.scaleLinear()
-    .domain([0, d3.max(data, (d, i) => d.value)])
-    .range([height, 0]);
+    // Create y scale
+    let yScale = d3.scaleLinear()
+        .domain( [opt.scale_pad.y_low, d3.max( data, d => d.value ) + opt.scale_pad.y_high] );
 
-if (opt.show_x_labels) {
-    // Create x-axis
-    svg.append("g")
-        .attr('id', 'bottom-axis')
-        .attr("transform", "translate(" + opt.left_margin + "," + (height + opt.top_margin) + ")")
-        .call(d3.axisBottom(x));
+    // These add the x and y axes to the output, in order to figure out their 
+    // dimensions we can't completely draw the axis until we know the 
+    // placement of all the chart items
+    opt = setup_xaxis(xScale, chart_area, opt);
+    opt = setup_yaxis(yScale, chart_area, opt);
+
+    // Calculate chart area dimensions
+    opt = set_chart_dimensions(opt);
+
+    chart_area
+        .attr('transform', `translate(${opt.chart_area.bounds.left},${opt.chart_area.bounds.top})`);
     
-    // Rotate titles
-    let bottom_axis_text = d3.selectAll("#bottom-axis text")
-    bottom_axis_text.attr('transform', 'rotate(45)').attr('text-anchor', 'start')
+    xScale
+        .range([0, opt.chart_area.bounds.width]);
+
+    yScale
+        .range([opt.chart_area.bounds.height, 0]);
+
+    draw_xaxis(xScale, opt);
+    draw_yaxis(yScale, opt);
+
+    // Add titles to the chart
+    addSVGText(opt.chart_title, 'chart-title');
+    addSVGText(opt.x_title, 'x-axis-title');
+    addSVGText(opt.y_title, 'y-axis-title')
+        .attr('transform',`translate(${opt.y_title.bounds.xmid}, ${opt.y_title.bounds.ymid})rotate(-90)`);
+
+    // Create bars
+    chart_area.selectAll("rect")
+        .data(data)
+        .enter()
+        .append("rect")
+        .attr("x", (d, i) => { return xScale(opt.x_axis.visible ? d.label : i); })
+        .attr("y", (d, i) => { return yScale(d.value); })
+        .attr("width", (d) => { return xScale.bandwidth(); })
+        .attr("height", (d) => { return opt.chart_area.bounds.height - yScale(d.value); })
+        .attr("fill", "steelblue")
+        .attr("stroke", "black");
+
 }
 
-if (opt.show_y_labels) {
-    // Create y-axis
-    svg.append("g")
-        .attr('id', 'left-axis')
-        .attr("transform", "translate(" + opt.left_margin + "," + opt.top_margin + ")")
-        .call(d3.axisLeft(y).tickValues(d3.range(0, 3, 1)).tickFormat((d,i) => `${Math.round(d)}`));
-}
+function setupBarChartInput(barchartopt) {
 
-// Create bars
-svg.selectAll("rect")
-    .data(data)
-    .enter()
-    .append("rect")
-    .attr("x", (d, i) => { return opt.left_margin + x(getLabel(d)); })
-    .attr("y", (d, i) => { return y(d.value) + opt.top_margin; })
-    .attr("width", (d) => { return x.bandwidth(); })
-    .attr("height", (d) => { return height - y(d.value); })
-    .attr("fill", "steelblue")
-    .attr("stroke", "black");
+    document.getElementById('barchart-width').value = barchartopt.width;
+    document.getElementById('barchart-width').oninput = () => {
+        barchartopt.width = document.getElementById('barchart-width').value;
+        actionCreateBarChart();
+    }
 
-function getLabel(data) {
-    return opt.show_x_labels ? data.label : data.index;
+    document.getElementById('barchart-height').value = barchartopt.height;
+    document.getElementById('barchart-height').oninput = () => {
+        barchartopt.height = document.getElementById('barchart-height').value;
+        actionCreateBarChart();
+    }
+
+    document.getElementById('barchart-charttitle-visible').checked = barchartopt.chart_title.visible;
+    document.getElementById('barchart-charttitle-visible').onclick = () => {
+        barchartopt.chart_title.visible = !barchartopt.chart_title.visible;
+        actionCreateBarChart();
+    }
+
+    document.getElementById('barchart-charttitle-text').value = barchartopt.chart_title.text;
+    document.getElementById('barchart-charttitle-text').oninput = () => {
+        barchartopt.chart_title.text = document.getElementById('barchart-charttitle-text').value;
+        actionCreateBarChart();
+    }
+
+    document.getElementById('barchart-charttitle-font').value = barchartopt.chart_title.font;
+    document.getElementById('barchart-charttitle-font').oninput = () => {
+        barchartopt.chart_title.font = document.getElementById('barchart-charttitle-font').value;
+        actionCreateBarChart();
+    }
+
+    document.getElementById('barchart-charttitle-size').value = barchartopt.chart_title.size;
+    document.getElementById('barchart-charttitle-size').oninput = () => {
+        barchartopt.chart_title.size = document.getElementById('barchart-charttitle-size').value;
+        actionCreateBarChart();
+    }
+
+    document.getElementById('barchart-charttitle-weight').value = barchartopt.chart_title.weight;
+    document.getElementById('barchart-charttitle-weight').oninput = () => {
+        barchartopt.chart_title.weight = document.getElementById('barchart-charttitle-weight').value;
+        actionCreateBarChart();
+    }
+
+    document.getElementById('barchart-charttitle-color').value = barchartopt.chart_title.color;
+    document.getElementById('barchart-charttitle-color').oninput = () => {
+        barchartopt.chart_title.color = document.getElementById('barchart-charttitle-color').value;
+        actionCreateBarChart();
+    }
+
+    document.getElementById('barchart-charttitle-pad').value = barchartopt.chart_title.pad;
+    document.getElementById('barchart-charttitle-pad').oninput = () => {
+        barchartopt.chart_title.pad = document.getElementById('barchart-charttitle-pad').value;
+        actionCreateBarChart();
+    }
+
 }
-*/

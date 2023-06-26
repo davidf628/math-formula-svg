@@ -63,7 +63,7 @@
             bounds: {}
         },
         x_axis: {
-            visible: true,
+            visible: false,
             label_rotation: 0
         },
         y_axis: {
@@ -86,8 +86,8 @@
 
     // Sample data
     const data = [
-        { index: 0, label: 'Ozistra', value: 0.29 },
-        { index: 1, label: 'Placebo', value: 0.21 }
+        { label: 'Ozistra', value: 0.29 },
+        { label: 'Placebo', value: 0.21 }
     ];
 
     // Set up drawing area
@@ -110,12 +110,12 @@
     
     // Create x scale
     let xScale = d3.scaleBand()
-        .domain( data.map((d, i) => getLabel(d)) )
+        .domain( data.map( (d,i) => opt.x_axis.visible ? d.label : i))
         .padding(opt.padding);
 
     // Create y scale
     let yScale = d3.scaleLinear()
-        .domain( [opt.scale_pad.y_low, dataMax(data, 'y') + opt.scale_pad.y_high] );
+        .domain( [opt.scale_pad.y_low, d3.max( data, (d,i) => d.value ) + opt.scale_pad.y_high] );
     
     // These add the x and y axes to the output, in order to figure out their 
     // dimensions we can't completely draw the axis until we know the 
@@ -149,7 +149,7 @@
         .data(data)
         .enter()
         .append("rect")
-        .attr("x", (d, i) => { return xScale(getLabel(d)); })
+        .attr("x", (d, i) => { return xScale(opt.x_axis.visible ? d.label : i); })
         .attr("y", (d, i) => { return yScale(d.value); })
         .attr("width", (d) => { return xScale.bandwidth(); })
         .attr("height", (d) => { return opt.chart_area.bounds.height - yScale(d.value); })
@@ -330,10 +330,6 @@
         bounds.xmid = bounds.left + bounds.width / 2;
         bounds.ymid = bounds.top + bounds.height / 2;
         return bounds;
-    }
-        
-    function getLabel(data) {
-        return opt.x_axis.visible ? data.label : data.index;
     }
     
     function dataMax(data) {
