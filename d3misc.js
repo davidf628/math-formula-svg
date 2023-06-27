@@ -58,9 +58,16 @@ function setup_xaxis(xScale, chart_area, opt) {
         
         if (opt.x_axis.label_rotation != 0) {
             d3.selectAll('#x-axis text')
-                .attr('transform', `rotate(${opt.x_axis.label_rotation})`)
+                .attr('transform', `rotate(${opt.x_axis.labels.rotation})`)
                 .attr('text-anchor', 'start');
         }
+
+        d3.selectAll('#x-axis text')
+            .style('font-family', opt.x_axis.labels.font)
+            .style('font-size', opt.x_axis.labels.size)
+            .style('font-weight', opt.x_axis.labels.weight)
+            .attr('fill', opt.x_axis.labels.color)
+
         opt.x_axis.bounds = document.getElementById('x-axis').getBBox();
     } else {
         opt.x_axis.bounds = { x: 0, y: 0, width: 0, height: opt.default_margin }
@@ -73,18 +80,26 @@ function setup_yaxis(yScale, chart_area, opt) {
     
     if (opt.y_axis.visible) {   
 
-        const scale = opt.y_axis.manual_ticks 
+        console.log(opt.y_axis.scale);
+        const scale = opt.y_axis.manual_range 
             ? d3.axisLeft(yScale)
-                .tickFormat(d3.format(opt.y_axis.tick_format))
+                .tickFormat(d3.format(opt.y_axis.labels.format))
                 .tickValues(d3.range(opt.y_axis.scale.min, opt.y_axis.scale.max, opt.y_axis.scale.step))
             : d3.axisLeft(yScale)
-                .tickFormat(d3.format(opt.y_axis.tick_format));
+                .tickFormat(d3.format(opt.y_axis.labels.format));
 
         chart_area.append('g')
             .attr('id', 'y-axis')
             .call(scale);
 
+        d3.selectAll('#y-axis text')
+            .style('font-family', opt.y_axis.labels.font)
+            .style('font-size', opt.y_axis.labels.size)
+            .style('font-weight', opt.y_axis.labels.weight)
+            .attr('fill', opt.y_axis.labels.color)
+
         opt.y_axis.bounds = document.getElementById('y-axis').getBBox();
+
     } else {
         opt.y_axis.bounds = { x: 0, y: 0, width: opt.default_margin, height: 0 };
         opt.y_axis.grid = false;
@@ -95,10 +110,21 @@ function setup_yaxis(yScale, chart_area, opt) {
 function draw_xaxis(xScale, opt) {
     // Redraw the axes, now that we know the correct dimensions
     if (opt.x_axis.visible) {
-        const scale = d3.axisBottom(xScale);
+        let scale = d3.axisBottom(xScale);
         d3.select('#x-axis')
             .attr('transform', `translate(0,${opt.chart_area.bounds.height})`)
             .call(scale);
+        opt.x_axis.bounds = document.getElementById('x-axis').getBBox();
+
+        // Check to see if the x-labels extend beyond the drawing area
+        // Adjust the scale if this is the case
+        let x_error = opt.chart_area.bounds.width - opt.x_axis.bounds.width;
+        console.log(x_error);
+        if (x_error < 0) {
+            xScale.range([0, opt.chart_area.bounds.width + x_error]);
+            scale = d3.axisBottom(xScale);
+            d3.select('#x-axis').call(scale);
+        }
     }
 
 }
@@ -106,12 +132,12 @@ function draw_xaxis(xScale, opt) {
 function draw_yaxis(yScale, opt) {
     if (opt.y_axis.visible) {
 
-        const scale = opt.y_axis.manual_ticks 
+        const scale = opt.y_axis.manual_range 
             ? d3.axisLeft(yScale)
-                .tickFormat(d3.format(opt.y_axis.tick_format))
-                .tickValues(d3.range(opt.y_axis.scale.min, opt.y_axis.scale.max, opt.y_axis.scale.step))
+                .tickFormat(d3.format(opt.y_axis.labels.format))
+                .tickValues(d3.range(opt.y_axis.scale.min, opt.y_axis.scale.max + opt.y_axis.scale.step, opt.y_axis.scale.step))
             : d3.axisLeft(yScale)
-                .tickFormat(d3.format(opt.y_axis.tick_format));
+                .tickFormat(d3.format(opt.y_axis.labels.format));
 
         d3.select('#y-axis')
             .call(scale);
@@ -172,4 +198,24 @@ function calculateBounds(bounds) {
     bounds.xmid = bounds.left + bounds.width / 2;
     bounds.ymid = bounds.top + bounds.height / 2;
     return bounds;
+}
+
+function drawVerticalLine(svg, xloc) {
+    svg
+        .append('line')
+        .attr('stroke', 'red')
+        .attr('x1', xloc)
+        .attr('y1', 0)
+        .attr('x2', xloc)
+        .attr('y2', 500)
+}
+
+function drawHorizontalLine(svg, yloc) {
+    svg
+        .append('line')
+        .attr('stroke', 'red')
+        .attr('x1', 0)
+        .attr('y1', yloc)
+        .attr('x2', 400)
+        .attr('y2', yloc)
 }

@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="./style.css">
 
     <script src="d3.js"></script>
+    <script src="d3misc.js"></script>
 
 </head>
 
@@ -41,8 +42,8 @@
             bounds: {}
         },
         x_title: {
-            visible: false,
-            text: 'Monthly Rent ($)',
+            visible: true,
+            text: 'Band',
             font: 'Helvetica',
             size: '12px',
             weight: 'normal',
@@ -63,12 +64,18 @@
             bounds: {}
         },
         x_axis: {
-            visible: false,
-            label_rotation: 0
+            visible: true,
+            labels: {
+                rotation: 45,
+            }
         },
         y_axis: {
             visible: true,
-            tick_format: '.0%',
+            font: 'Helvetica',
+            size: 12,
+            weight: 'normal',
+            color: 'black',
+            tick_format: '',
             grid: true,
             grid_color: '#e0e0e0',
             manual_ticks: false,
@@ -86,8 +93,29 @@
 
     // Sample data
     const data = [
-        { label: 'Ozistra', value: 0.29 },
-        { label: 'Placebo', value: 0.21 }
+        { label: 'Taylor Swift', value: 2 },
+        { label: 'Twenty One Pilots', value: 2 },
+        { label: 'Alan Walker', value: 1 },
+        { label: 'Arctic Monkeys', value: 1 },
+        { label: 'Ariana Grande', value: 1 },
+        { label: 'Bad Bunny', value: 1 },
+        { label: 'The Chainsmokers', value: 1 },
+        { label: 'The Clash', value: 1 },
+        { label: 'The Dave Matthews Band', value: 1 },
+        { label: 'David Bowie', value: 1 },
+        { label: 'Eminem', value: 1 },
+        { label: 'The Fat Rat', value: 1 },
+        { label: 'Imagine Dragons', value: 1 },
+        { label: 'Katy Perry', value: 1 },
+        { label: 'Lana Del Rey', value: 1 },
+        { label: 'Lil Pump', value: 1 },
+        { label: 'Meghan Trainor', value: 1 },
+        { label: 'Modest Mouse', value: 1 },
+        { label: 'Nirvana', value: 1 },
+        { label: 'Radiohead', value: 1 },
+        { label: 'Rhianna', value: 1 },
+        { label: 'Sublime', value: 1 },
+        { label: 'The White Stripes', value: 1 },
     ];
 
     // Set up drawing area
@@ -141,8 +169,10 @@
     // Add titles to the chart
     addSVGText(opt.chart_title, 'chart-title');
     addSVGText(opt.x_title, 'x-axis-title');
-    addSVGText(opt.y_title, 'y-axis-title')
-        .attr('transform',`translate(${opt.y_title.bounds.xmid}, ${opt.y_title.bounds.ymid})rotate(-90)`);
+    if (opt.y_title.visible) {
+        addSVGText(opt.y_title, 'y-axis-title')
+            .attr('transform',`translate(${opt.y_title.bounds.xmid}, ${opt.y_title.bounds.ymid})rotate(-90)`);
+    }
 
     // Create bars
     chart_area.selectAll("rect")
@@ -155,6 +185,16 @@
         .attr("height", (d) => { return opt.chart_area.bounds.height - yScale(d.value); })
         .attr("fill", "steelblue")
         .attr("stroke", "black");
+
+    drawVerticalLine(svg, opt.width - 5);
+    drawVerticalLine(svg, 46.416);
+    drawHorizontalLine(svg, 40.5);
+    drawHorizontalLine(svg, opt.height - 117.77);
+
+    drawVerticalLine(svg, 46.42);
+    drawVerticalLine(svg, 495);
+    drawHorizontalLine(svg, 40.5);
+    drawHorizontalLine(svg, 282.2);
           
     function getTextBounds(text) {
 
@@ -216,10 +256,11 @@
             
             if (opt.x_axis.label_rotation != 0) {
                 d3.selectAll('#x-axis text')
-                    .attr('transform', `rotate(${opt.x_axis.label_rotation})`)
+                    .attr('transform', `rotate(${opt.x_axis.labels.rotation})`)
                     .attr('text-anchor', 'start');
             }
             opt.x_axis.bounds = document.getElementById('x-axis').getBBox();
+
         } else {
             opt.x_axis.bounds = { x: 0, y: 0, width: 0, height: opt.default_margin }
             opt.x_axis.grid = false;
@@ -230,11 +271,22 @@
     function draw_xaxis(xScale, opt) {
         // Redraw the axes, now that we know the correct dimensions
         if (opt.x_axis.visible) {
-            const scale = d3.axisBottom(xScale);
+            let scale = d3.axisBottom(xScale);
             d3.select('#x-axis')
                 .attr('transform', `translate(0,${opt.chart_area.bounds.height})`)
                 .call(scale);
+            opt.x_axis.bounds = document.getElementById('x-axis').getBBox();
+    
+            // Check to see if the x-labels extend beyond the drawing area
+            // Adjust the scale if this is the case
+            let x_error = opt.chart_area.bounds.width - opt.x_axis.bounds.width;
+            if (x_error < 0) {
+                xScale.range([0, opt.chart_area.bounds.width + x_error]);
+                scale = d3.axisBottom(xScale);
+                d3.select('#x-axis').call(scale);
+            }
         }
+        
 
     }
     

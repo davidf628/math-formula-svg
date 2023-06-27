@@ -6,8 +6,6 @@ FORMULA CREATOR
 - Add ability to drag/drop an SVG equation file and bring the TeX commands into the editor
 
 CHART CREATOR
-- Figure out what's wrong with tilted text labels going too far past right side of chart
-- Ability to change the text size on the axis labels
 - Make the interface in electron for the chart creation
 - Make pie chart Creator
 - Make dot plot Creator

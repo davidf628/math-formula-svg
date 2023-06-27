@@ -29,7 +29,9 @@ function createBarChart(data, opt) {
 
     // Create y scale
     let yScale = d3.scaleLinear()
-        .domain( [opt.scale_pad.y_low, d3.max( data, d => d.value ) + opt.scale_pad.y_high] );
+        .domain([
+            opt.y_axis.manual_range ? opt.y_axis.scale.min : 0,
+            opt.y_axis.manual_range ? opt.y_axis.scale.max : d3.max( data, d => d.value)]);
 
     // These add the x and y axes to the output, in order to figure out their 
     // dimensions we can't completely draw the axis until we know the 
@@ -67,7 +69,7 @@ function createBarChart(data, opt) {
         .attr("y", (d, i) => { return yScale(d.value); })
         .attr("width", (d) => { return xScale.bandwidth(); })
         .attr("height", (d) => { return opt.chart_area.bounds.height - yScale(d.value); })
-        .attr("fill", "steelblue")
+        .attr("fill", opt.bar_color)
         .attr("stroke", "black");
 
 }
@@ -83,6 +85,42 @@ function setupBarChartInput(barchartopt) {
     document.getElementById('barchart-height').value = barchartopt.height;
     document.getElementById('barchart-height').oninput = () => {
         barchartopt.height = document.getElementById('barchart-height').value;
+        actionCreateBarChart();
+    }
+
+    document.getElementById('barchart-background-color').value = barchartopt.background_color;
+    document.getElementById('barchart-background-color').oninput = () => {
+        barchartopt.background_color = document.getElementById('barchart-background-color').value;
+        actionCreateBarChart();
+    }
+
+    document.getElementById('barchart-border-color').value = barchartopt.border_color;
+    document.getElementById('barchart-border-color').oninput = () => {
+        barchartopt.border_color = document.getElementById('barchart-border-color').value;
+        actionCreateBarChart();
+    }
+
+    document.getElementById('barchart-bar-color').value = barchartopt.bar_color;
+    document.getElementById('barchart-bar-color').oninput = () => {
+        barchartopt.bar_color = document.getElementById('barchart-bar-color').value;
+        actionCreateBarChart();
+    }
+
+    document.getElementById('barchart-bar-border-color').value = barchartopt.bar_border_color;
+    document.getElementById('barchart-bar-border-color').oninput = () => {
+        barchartopt.bar_border_color = document.getElementById('barchart-bar-border-color').value;
+        actionCreateBarChart();
+    }
+
+    document.getElementById('barchart-bar-pad').value = barchartopt.bar_padding;
+    document.getElementById('barchart-bar-pad').oninput = () => {
+        barchartopt.bar_padding = document.getElementById('barchart-bar-pad').value;
+        actionCreateBarChart();
+    }
+
+    document.getElementById('barchart-default-margin').value = barchartopt.default_margin;
+    document.getElementById('barchart-default-margin').oninput = () => {
+        barchartopt.default_margin = Number.parseInt(document.getElementById('barchart-default-margin').value);
         actionCreateBarChart();
     }
 

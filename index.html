@@ -78,12 +78,36 @@
             <fieldset>
                 <legend>Bar Chart Settings</legend>
                 <div>
+                    <label for="barchart-width">Width:</label>
                     <input type="number" id="barchart-width">
-                    <label for="barchart-width">Width</label>
                 </div>
                 <div>
+                    <label for="barchart-height">Height:</label>
                     <input type="number" id="barchart-height">
-                    <label for="barchart-height">Height</label>
+                </div>
+                <div>
+                    <label for="barchart-background-color">Background Color:</label>
+                    <input type="color" id="barchart-background-color">
+                </div>
+                <div>
+                    <label for="barchart-border-color">Border Color:</label>
+                    <input type="color" id="barchart-border-color">
+                </div>
+                <div>
+                    <label for="barchart-bar-color">Bar Color:</label>
+                    <input type="color" id="barchart-bar-color">
+                </div>
+                <div>
+                    <label for="barchart-bar-border-color">Bar Border Color:</label>
+                    <input type="color" id="barchart-bar-border-color">
+                </div>
+                <div>
+                    <label for="barchart-bar-pad">Padding: </label>
+                    <input type="number" id="barchart-bar-pad" min="0" max="1" step="0.01">
+                </div>
+                <div>
+                    <label for="barchart-default-margin">Default Margin: </label>
+                    <input type="number" id="barchart-default-margin" min="0" max="100">
                 </div>
             </fieldset>
         </div>
@@ -129,7 +153,7 @@
                     <input type="color" id="barchart-charttitle-color">
                 </div>
                 <div>
-                    <label for="barchart-charttitle-pad">Padding: </label>
+                    <label for="barchart-charttitle-pad">Bar Padding: </label>
                     <input type="number" id="barchart-charttitle-pad" min="0" max="100">
                 </div>
             </fieldset>
@@ -178,6 +202,7 @@
         }
         
         function actionCreateBarChart() {
+            console.log(barchartopt);
             createBarChart(barchartdata, barchartopt);
         }
 
@@ -189,10 +214,12 @@
     let barchartopt = {
         width: 500,
         height: 400,
-        background_color: '#AACCAA',
-        border_color: 'black',
-        default_margin: 5,
+        background_color: '#FFFFFF',
+        border_color: '#FFFFFF',
+        bar_color: '#4682b4',
+        bar_border_color: '#000000',
         bar_padding: 0,
+        default_margin: 5,
         chart_area: {
             bounds: {},
         },
@@ -202,7 +229,7 @@
             font: 'Helvetica',
             size: 20,
             weight: 'bold',
-            color: 'black',
+            color: '#000000',
             pad: 10,
             text_bounds: {},
             bounds: {}
@@ -231,35 +258,32 @@
         },
         x_axis: {
             visible: true,
-            tick_format: '$,',
-            label_rotation: 45,
-            grid: true,
-            grid_color: '#e0e0e0',
-            manual_ticks: false,
-            scale: {
-                min: 0,
-                max: 3000,
-                step: 500
-            }
+            labels: {
+                rotation: 45,
+                font: 'Helvetica',
+                size: 10,
+                weight: 'normal',
+                color: '#000000',
+            },
         },
         y_axis: {
             visible: true,
-            tick_format: '',
+            labels: {
+                font: 'Helvetica',
+                size: 10,
+                weight: 'normal',
+                color: '#000000',
+                format: '',
+            },
             grid: true,
             grid_color: '#e0e0e0',
-            manual_ticks: false,
+            manual_range: true,
             scale: {
                 min: 0,
-                max: 30,
-                step: 5
+                max: 2.2,
+                step: 1
             }
         },
-        scale_pad: {
-            x_low: 0,
-            y_low: 0,
-            x_high: 200,
-            y_high: 2,
-        }
     }
 
     const barchartdata = [
