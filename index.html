@@ -17,7 +17,7 @@
     <link rel="stylesheet" href="./style.css">
 
     <style>
-        #barchart-title-div, #barchart-settings-div {
+        #barchart-title-div, #barchart-settings-div #barchart-xtitle-div {
             float: left
         }
     </style>
@@ -158,6 +158,53 @@
                 </div>
             </fieldset>
         </div>
+        <div id="barchart-xtitle-div">
+            <fieldset>
+                <legend>Horizontal Title</legend>
+                <div>
+                    <input type="checkbox" id="barchart-xtitle-visible">
+                    <label for="barchart-xtitle-visible">Visible</label>
+                </div>
+                <div>
+                    <label for="barchart-xtitle-text">Enter Horizontal Title: </label>
+                    <input type="text" id="barchart-xtitle-text">
+                </div>
+                <div>
+                    <label for="barchart-xtitle-font">Font:</label>
+                    <select id="barchart-xtitle-font">
+                    <option value="Helvetica">Helvetica</option>
+                    <option value="Arial">Arial</option>
+                    <option value="Verdana">Verdana</option>
+                    <option value="Tahoma">Tahoma</option>
+                    <option value="Trebuchet MS">Trebuchet MS</option>
+                    <option value="Times New Roman">Times New Roman</option>
+                    <option value="Georgia">Georgia</option>
+                    <option value="Garamond">Garamond</option>
+                    <option value="Courier New">Courier New</option>
+                    <option value="Brush Script">Brush Script</option>
+                    </select> 
+                </div>
+                <div>
+                    <label for="barchart-xtitle-size">Font Size: </label>
+                    <input type="number" id="barchart-xtitle-size" min="6", max="72">
+                </div>
+                <div>
+                    <label for="barchart-xtitle-weight">Font Weight: </label>
+                    <select id="barchart-xtitle-weight">
+                        <option value="normal">Normal</option>
+                        <option value="bold">Bold</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="barchart-xtitle-color">Font Color:</label>
+                    <input type="color" id="barchart-xtitle-color">
+                </div>
+                <div>
+                    <label for="barchart-xtitle-pad">Bar Padding: </label>
+                    <input type="number" id="barchart-xtitle-pad" min="0" max="100">
+                </div>
+            </fieldset>
+        </div>
     </div>
 
 </body>
@@ -236,11 +283,11 @@
         },
         x_title: {
             visible: true,
-            text: 'Monthly Rent ($)',
+            text: 'Horizontal Title',
             font: 'Helvetica',
             size: 12,
             weight: 'normal',
-            color: 'black',
+            color: '#000000',
             pad: 5,
             text_bounds: {},
             bounds: {}

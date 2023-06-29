@@ -76,6 +76,7 @@ function createBarChart(data, opt) {
 
 function setupBarChartInput(barchartopt) {
 
+    // Chart Settings
     document.getElementById('barchart-width').value = barchartopt.width;
     document.getElementById('barchart-width').oninput = () => {
         barchartopt.width = document.getElementById('barchart-width').value;
@@ -124,6 +125,9 @@ function setupBarChartInput(barchartopt) {
         actionCreateBarChart();
     }
 
+
+    // Chart title settings
+
     document.getElementById('barchart-charttitle-visible').checked = barchartopt.chart_title.visible;
     document.getElementById('barchart-charttitle-visible').onclick = () => {
         barchartopt.chart_title.visible = !barchartopt.chart_title.visible;
@@ -165,5 +169,50 @@ function setupBarChartInput(barchartopt) {
         barchartopt.chart_title.pad = document.getElementById('barchart-charttitle-pad').value;
         actionCreateBarChart();
     }
+
+    // Horizontal title settings
+    
+    document.getElementById('barchart-xtitle-visible').checked = barchartopt.x_title.visible;
+    document.getElementById('barchart-xtitle-visible').onclick = () => {
+        barchartopt.x_title.visible = !barchartopt.x_title.visible;
+        actionCreateBarChart();
+    }
+
+    document.getElementById('barchart-xtitle-text').value = barchartopt.x_title.text;
+    document.getElementById('barchart-xtitle-text').oninput = () => {
+        barchartopt.x_title.text = document.getElementById('barchart-xtitle-text').value;
+        actionCreateBarChart();
+    }
+
+    document.getElementById('barchart-xtitle-font').value = barchartopt.x_title.font;
+    document.getElementById('barchart-xtitle-font').oninput = () => {
+        barchartopt.x_title.font = document.getElementById('barchart-xtitle-font').value;
+        actionCreateBarChart();
+    }
+
+    document.getElementById('barchart-xtitle-size').value = barchartopt.x_title.size;
+    document.getElementById('barchart-xtitle-size').oninput = () => {
+        barchartopt.x_title.size = document.getElementById('barchart-xtitle-size').value;
+        actionCreateBarChart();
+    }
+
+    document.getElementById('barchart-xtitle-weight').value = barchartopt.x_title.weight;
+    document.getElementById('barchart-xtitle-weight').oninput = () => {
+        barchartopt.x_title.weight = document.getElementById('barchart-xtitle-weight').value;
+        actionCreateBarChart();
+    }
+
+    document.getElementById('barchart-xtitle-color').value = barchartopt.x_title.color;
+    document.getElementById('barchart-xtitle-color').oninput = () => {
+        barchartopt.x_title.color = document.getElementById('barchart-xtitle-color').value;
+        actionCreateBarChart();
+    }
+
+    document.getElementById('barchart-xtitle-pad').value = barchartopt.x_title.pad;
+    document.getElementById('barchart-xtitle-pad').oninput = () => {
+        barchartopt.x_title.pad = document.getElementById('barchart-xtitle-pad').value;
+        actionCreateBarChart();
+    }
+
 
 }
