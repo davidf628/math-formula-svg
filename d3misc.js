@@ -27,7 +27,7 @@ function getTextBounds(text) {
     return bounds;
 }
 
-function addSVGText(text, elementId) {
+function addSVGText(text, elementId, orientation) {
 
     if (text.visible) {
         let object = d3.select('svg')
@@ -41,9 +41,10 @@ function addSVGText(text, elementId) {
             .attr('text-anchor', 'middle')
             .attr('dominant-baseline', 'middle')
             .text(text.text);
-        return object;
+        if (orientation == 'vertical') {
+            object.attr('transform',`translate(${text.bounds.xmid}, ${text.bounds.ymid})rotate(-90)`)
+        }
     }
-    return undefined;
 }
 
 function setup_xaxis(xScale, chart_area, opt) {

@@ -17,9 +17,11 @@
     <link rel="stylesheet" href="./style.css">
 
     <style>
-        #barchart-title-div, #barchart-settings-div #barchart-xtitle-div {
-            float: left
+        #barchart-group-1 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
         }
+
     </style>
 
 </head>
@@ -74,136 +76,185 @@
             </svg>
         </div>
         <input type="button" id="create-barchart" onClick="actionCreateBarChart()">
-        <div id="barchart-settings-div">
-            <fieldset>
-                <legend>Bar Chart Settings</legend>
-                <div>
-                    <label for="barchart-width">Width:</label>
-                    <input type="number" id="barchart-width">
-                </div>
-                <div>
-                    <label for="barchart-height">Height:</label>
-                    <input type="number" id="barchart-height">
-                </div>
-                <div>
-                    <label for="barchart-background-color">Background Color:</label>
-                    <input type="color" id="barchart-background-color">
-                </div>
-                <div>
-                    <label for="barchart-border-color">Border Color:</label>
-                    <input type="color" id="barchart-border-color">
-                </div>
-                <div>
-                    <label for="barchart-bar-color">Bar Color:</label>
-                    <input type="color" id="barchart-bar-color">
-                </div>
-                <div>
-                    <label for="barchart-bar-border-color">Bar Border Color:</label>
-                    <input type="color" id="barchart-bar-border-color">
-                </div>
-                <div>
-                    <label for="barchart-bar-pad">Padding: </label>
-                    <input type="number" id="barchart-bar-pad" min="0" max="1" step="0.01">
-                </div>
-                <div>
-                    <label for="barchart-default-margin">Default Margin: </label>
-                    <input type="number" id="barchart-default-margin" min="0" max="100">
-                </div>
-            </fieldset>
-        </div>
-        <div id="barchart-title-div">
-            <fieldset>
-                <legend>Chart Title</legend>
-                <div>
-                    <input type="checkbox" id="barchart-charttitle-visible">
-                    <label for="barchart-charttitle-visible">Visible</label>
-                </div>
-                <div>
-                    <label for="barchart-charttitle-text">Enter Chart Title: </label>
-                    <input type="text" id="barchart-charttitle-text">
-                </div>
-                <div>
-                    <label for="barchart-charttitle-font">Font:</label>
-                    <select id="barchart-charttitle-font">
-                    <option value="Helvetica">Helvetica</option>
-                    <option value="Arial">Arial</option>
-                    <option value="Verdana">Verdana</option>
-                    <option value="Tahoma">Tahoma</option>
-                    <option value="Trebuchet MS">Trebuchet MS</option>
-                    <option value="Times New Roman">Times New Roman</option>
-                    <option value="Georgia">Georgia</option>
-                    <option value="Garamond">Garamond</option>
-                    <option value="Courier New">Courier New</option>
-                    <option value="Brush Script">Brush Script</option>
-                    </select> 
-                </div>
-                <div>
-                    <label for="barchart-charttitle-size">Font Size: </label>
-                    <input type="number" id="barchart-charttitle-size" min="6", max="72">
-                </div>
-                <div>
-                    <label for="barchart-charttitle-weight">Font Weight: </label>
-                    <select id="barchart-charttitle-weight">
-                        <option value="normal">Normal</option>
-                        <option value="bold">Bold</option>
-                    </select>
-                </div>
-                <div>
-                    <label for="barchart-charttitle-color">Font Color:</label>
-                    <input type="color" id="barchart-charttitle-color">
-                </div>
-                <div>
-                    <label for="barchart-charttitle-pad">Bar Padding: </label>
-                    <input type="number" id="barchart-charttitle-pad" min="0" max="100">
-                </div>
-            </fieldset>
-        </div>
-        <div id="barchart-xtitle-div">
-            <fieldset>
-                <legend>Horizontal Title</legend>
-                <div>
-                    <input type="checkbox" id="barchart-xtitle-visible">
-                    <label for="barchart-xtitle-visible">Visible</label>
-                </div>
-                <div>
-                    <label for="barchart-xtitle-text">Enter Horizontal Title: </label>
-                    <input type="text" id="barchart-xtitle-text">
-                </div>
-                <div>
-                    <label for="barchart-xtitle-font">Font:</label>
-                    <select id="barchart-xtitle-font">
-                    <option value="Helvetica">Helvetica</option>
-                    <option value="Arial">Arial</option>
-                    <option value="Verdana">Verdana</option>
-                    <option value="Tahoma">Tahoma</option>
-                    <option value="Trebuchet MS">Trebuchet MS</option>
-                    <option value="Times New Roman">Times New Roman</option>
-                    <option value="Georgia">Georgia</option>
-                    <option value="Garamond">Garamond</option>
-                    <option value="Courier New">Courier New</option>
-                    <option value="Brush Script">Brush Script</option>
-                    </select> 
-                </div>
-                <div>
-                    <label for="barchart-xtitle-size">Font Size: </label>
-                    <input type="number" id="barchart-xtitle-size" min="6", max="72">
-                </div>
-                <div>
-                    <label for="barchart-xtitle-weight">Font Weight: </label>
-                    <select id="barchart-xtitle-weight">
-                        <option value="normal">Normal</option>
-                        <option value="bold">Bold</option>
-                    </select>
-                </div>
-                <div>
-                    <label for="barchart-xtitle-color">Font Color:</label>
-                    <input type="color" id="barchart-xtitle-color">
-                </div>
-                <div>
-                    <label for="barchart-xtitle-pad">Bar Padding: </label>
-                    <input type="number" id="barchart-xtitle-pad" min="0" max="100">
-                </div>
-            </fieldset>
+        <div id="barchart-group-1">
+            <div id="barchart-settings-div">
+                <fieldset>
+                    <legend>Bar Chart Settings</legend>
+                    <div>
+                        <label for="barchart-width">Width:</label>
+                        <input type="number" id="barchart-width">
+                    </div>
+                    <div>
+                        <label for="barchart-height">Height:</label>
+                        <input type="number" id="barchart-height">
+                    </div>
+                    <div>
+                        <label for="barchart-background-color">Background Color:</label>
+                        <input type="color" id="barchart-background-color">
+                    </div>
+                    <div>
+                        <label for="barchart-border-color">Border Color:</label>
+                        <input type="color" id="barchart-border-color">
+                    </div>
+                    <div>
+                        <label for="barchart-bar-color">Bar Color:</label>
+                        <input type="color" id="barchart-bar-color">
+                    </div>
+                    <div>
+                        <label for="barchart-bar-border-color">Bar Border Color:</label>
+                        <input type="color" id="barchart-bar-border-color">
+                    </div>
+                    <div>
+                        <label for="barchart-bar-pad">Padding: </label>
+                        <input type="number" id="barchart-bar-pad" min="0" max="1" step="0.01">
+                    </div>
+                    <div>
+                        <label for="barchart-default-margin">Default Margin: </label>
+                        <input type="number" id="barchart-default-margin" min="0" max="100">
+                    </div>
+                </fieldset>
+            </div>
+            <div id="barchart-title-div">
+                <fieldset>
+                    <legend>Chart Title</legend>
+                    <div>
+                        <input type="checkbox" id="barchart-charttitle-visible">
+                        <label for="barchart-charttitle-visible">Visible</label>
+                    </div>
+                    <div>
+                        <label for="barchart-charttitle-text">Enter Chart Title: </label>
+                        <input type="text" id="barchart-charttitle-text">
+                    </div>
+                    <div>
+                        <label for="barchart-charttitle-font">Font:</label>
+                        <select id="barchart-charttitle-font">
+                        <option value="Helvetica">Helvetica</option>
+                        <option value="Arial">Arial</option>
+                        <option value="Verdana">Verdana</option>
+                        <option value="Tahoma">Tahoma</option>
+                        <option value="Trebuchet MS">Trebuchet MS</option>
+                        <option value="Times New Roman">Times New Roman</option>
+                        <option value="Georgia">Georgia</option>
+                        <option value="Garamond">Garamond</option>
+                        <option value="Courier New">Courier New</option>
+                        <option value="Brush Script">Brush Script</option>
+                        </select> 
+                    </div>
+                    <div>
+                        <label for="barchart-charttitle-size">Font Size: </label>
+                        <input type="number" id="barchart-charttitle-size" min="6", max="72">
+                    </div>
+                    <div>
+                        <label for="barchart-charttitle-weight">Font Weight: </label>
+                        <select id="barchart-charttitle-weight">
+                            <option value="normal">Normal</option>
+                            <option value="bold">Bold</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="barchart-charttitle-color">Font Color:</label>
+                        <input type="color" id="barchart-charttitle-color">
+                    </div>
+                    <div>
+                        <label for="barchart-charttitle-pad">Bar Padding: </label>
+                        <input type="number" id="barchart-charttitle-pad" min="0" max="100">
+                    </div>
+                </fieldset>
+            </div>
+            <div id="barchart-xtitle-div">
+                <fieldset>
+                    <legend>Horizontal Title</legend>
+                    <div>
+                        <input type="checkbox" id="barchart-xtitle-visible">
+                        <label for="barchart-xtitle-visible">Visible</label>
+                    </div>
+                    <div>
+                        <label for="barchart-xtitle-text">Enter Horizontal Title: </label>
+                        <input type="text" id="barchart-xtitle-text">
+                    </div>
+                    <div>
+                        <label for="barchart-xtitle-font">Font:</label>
+                        <select id="barchart-xtitle-font">
+                        <option value="Helvetica">Helvetica</option>
+                        <option value="Arial">Arial</option>
+                        <option value="Verdana">Verdana</option>
+                        <option value="Tahoma">Tahoma</option>
+                        <option value="Trebuchet MS">Trebuchet MS</option>
+                        <option value="Times New Roman">Times New Roman</option>
+                        <option value="Georgia">Georgia</option>
+                        <option value="Garamond">Garamond</option>
+                        <option value="Courier New">Courier New</option>
+                        <option value="Brush Script">Brush Script</option>
+                        </select> 
+                    </div>
+                    <div>
+                        <label for="barchart-xtitle-size">Font Size: </label>
+                        <input type="number" id="barchart-xtitle-size" min="6", max="72">
+                    </div>
+                    <div>
+                        <label for="barchart-xtitle-weight">Font Weight: </label>
+                        <select id="barchart-xtitle-weight">
+                            <option value="normal">Normal</option>
+                            <option value="bold">Bold</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="barchart-xtitle-color">Font Color:</label>
+                        <input type="color" id="barchart-xtitle-color">
+                    </div>
+                    <div>
+                        <label for="barchart-xtitle-pad">Padding: </label>
+                        <input type="number" id="barchart-xtitle-pad" min="0" max="100">
+                    </div>
+                </fieldset>
+            </div>
+            <div id="barchart-ytitle-div">
+                <fieldset>
+                    <legend>Vertical Title</legend>
+                    <div>
+                        <input type="checkbox" id="barchart-ytitle-visible">
+                        <label for="barchart-ytitle-visible">Visible</label>
+                    </div>
+                    <div>
+                        <label for="barchart-ytitle-text">Enter Vertical Title: </label>
+                        <input type="text" id="barchart-ytitle-text">
+                    </div>
+                    <div>
+                        <label for="barchart-ytitle-font">Font:</label>
+                        <select id="barchart-ytitle-font">
+                        <option value="Helvetica">Helvetica</option>
+                        <option value="Arial">Arial</option>
+                        <option value="Verdana">Verdana</option>
+                        <option value="Tahoma">Tahoma</option>
+                        <option value="Trebuchet MS">Trebuchet MS</option>
+                        <option value="Times New Roman">Times New Roman</option>
+                        <option value="Georgia">Georgia</option>
+                        <option value="Garamond">Garamond</option>
+                        <option value="Courier New">Courier New</option>
+                        <option value="Brush Script">Brush Script</option>
+                        </select> 
+                    </div>
+                    <div>
+                        <label for="barchart-ytitle-size">Font Size: </label>
+                        <input type="number" id="barchart-ytitle-size" min="6", max="72">
+                    </div>
+                    <div>
+                        <label for="barchart-ytitle-weight">Font Weight: </label>
+                        <select id="barchart-ytitle-weight">
+                            <option value="normal">Normal</option>
+                            <option value="bold">Bold</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="barchart-ytitle-color">Font Color:</label>
+                        <input type="color" id="barchart-ytitle-color">
+                    </div>
+                    <div>
+                        <label for="barchart-ytitle-pad">Padding: </label>
+                        <input type="number" id="barchart-ytitle-pad" min="0" max="100">
+                    </div>
+                </fieldset>
+            </div>
         </div>
     </div>
 
@@ -294,11 +345,11 @@
         },
         y_title: {
             visible: true,
-            text: 'Cumulative Frequency',
+            text: 'Frequency',
             font: 'Helvetica',
             size: 12,
             weight: 'normal',
-            color: 'black',
+            color: '#000000',
             pad: 5,
             text_bounds: {},
             bounds: {}

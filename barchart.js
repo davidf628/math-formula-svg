@@ -55,10 +55,10 @@ function createBarChart(data, opt) {
     draw_yaxis(yScale, opt);
 
     // Add titles to the chart
-    addSVGText(opt.chart_title, 'chart-title');
-    addSVGText(opt.x_title, 'x-axis-title');
-    addSVGText(opt.y_title, 'y-axis-title')
-        .attr('transform',`translate(${opt.y_title.bounds.xmid}, ${opt.y_title.bounds.ymid})rotate(-90)`);
+    addSVGText(opt.chart_title, 'chart-title', 'horizontal');
+    addSVGText(opt.x_title, 'x-axis-title', 'horizontal');
+    addSVGText(opt.y_title, 'y-axis-title', 'vertical');
+
 
     // Create bars
     chart_area.selectAll("rect")
@@ -214,5 +214,47 @@ function setupBarChartInput(barchartopt) {
         actionCreateBarChart();
     }
 
+    // Vertical title settings
+        
+    document.getElementById('barchart-ytitle-visible').checked = barchartopt.y_title.visible;
+    document.getElementById('barchart-ytitle-visible').onclick = () => {
+        barchartopt.y_title.visible = !barchartopt.y_title.visible;
+        actionCreateBarChart();
+    }
 
+    document.getElementById('barchart-ytitle-text').value = barchartopt.y_title.text;
+    document.getElementById('barchart-ytitle-text').oninput = () => {
+        barchartopt.y_title.text = document.getElementById('barchart-ytitle-text').value;
+        actionCreateBarChart();
+    }
+
+    document.getElementById('barchart-ytitle-font').value = barchartopt.y_title.font;
+    document.getElementById('barchart-ytitle-font').oninput = () => {
+        barchartopt.y_title.font = document.getElementById('barchart-ytitle-font').value;
+        actionCreateBarChart();
+    }
+
+    document.getElementById('barchart-ytitle-size').value = barchartopt.y_title.size;
+    document.getElementById('barchart-ytitle-size').oninput = () => {
+        barchartopt.y_title.size = document.getElementById('barchart-ytitle-size').value;
+        actionCreateBarChart();
+    }
+
+    document.getElementById('barchart-ytitle-weight').value = barchartopt.y_title.weight;
+    document.getElementById('barchart-ytitle-weight').oninput = () => {
+        barchartopt.y_title.weight = document.getElementById('barchart-ytitle-weight').value;
+        actionCreateBarChart();
+    }
+
+    document.getElementById('barchart-ytitle-color').value = barchartopt.y_title.color;
+    document.getElementById('barchart-ytitle-color').oninput = () => {
+        barchartopt.y_title.color = document.getElementById('barchart-ytitle-color').value;
+        actionCreateBarChart();
+    }
+
+    document.getElementById('barchart-ytitle-pad').value = barchartopt.y_title.pad;
+    document.getElementById('barchart-ytitle-pad').oninput = () => {
+        barchartopt.y_title.pad = document.getElementById('barchart-ytitle-pad').value;
+        actionCreateBarChart();
+    }
 }
